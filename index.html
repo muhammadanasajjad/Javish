@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Interpreter IDE</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/vis-network/styles/vis-network.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/vis-network/dist/vis-network.min.js"></script>
+  </head>
+  <body>
+    <div id="sidebar" class="sidebar">
+      <h2>Tokens</h2>
+      <div id="tokens" class="panel"></div>
+      <h2>Parsed Tree (AST)</h2>
+      <div id="ast" class="panel"></div>
+    </div>
+    <div id="divider"></div>
+    <div class="main">
+      <div class="editorWrapper">
+        <pre id="highlighted"></pre>
+        <textarea id="editor">
+int x = 5;
+int y = 10;
+int z = x + y;</textarea
+        >
+      </div>
+      <div class="resizable-vertical" id="bottomPanel">
+        <div class="resizer-vertical" id="resizerVertical"></div>
+        <div class="controls">
+          <button id="runBtn">Run</button>
+          <button id="clearBtn">Clear</button>
+        </div>
+        <div id="output"></div>
+      </div>
+    </div>
+    <script src="tokenise.js"></script>
+    <script src="parse.js"></script>
+    <script src="run.js"></script>
+    <script src="ioHandler.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
