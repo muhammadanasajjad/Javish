@@ -6,6 +6,43 @@ function printCustomMessage(message) {
   line.textContent = message;
 
   container.appendChild(line);
+  container.scrollTo({
+    top: container.scrollHeight,
+    behavior: "smooth",
+  });
+}
+
+async function getCustomInput() {
+  const container = document.getElementById("output");
+
+  const input = document.createElement("input");
+  input.className = "customInput";
+  container.appendChild(input);
+
+  input.focus();
+
+  const value = await new Promise((resolve) => {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const val = input.value;
+        input.remove();
+
+        const echo = document.createElement("div");
+        echo.className = "customInput";
+        echo.textContent = val;
+        container.appendChild(echo);
+
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: "smooth",
+        });
+
+        resolve(val);
+      }
+    });
+  });
+
+  return value;
 }
 
 function throwCustomError(message, node = null, fullCode) {
@@ -56,6 +93,10 @@ function throwCustomError(message, node = null, fullCode) {
   }
 
   container.appendChild(wrapper);
+  container.scrollTo({
+    top: container.scrollHeight,
+    behavior: "smooth",
+  });
 
   throw new Error(message);
 }

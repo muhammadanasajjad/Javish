@@ -258,14 +258,26 @@ function runCode() {
       "Still running... don't forget to stretch your fingers!",
       "Help! Maybe someone should optimise the interpreter!",
     ];
-    if (duration > 1000)
+    if (
+      duration > 1000 &&
+      !tokens.some(
+        (t, i) =>
+          t.value === "input" && tokens[i + 1] && tokens[i + 1].value === "(",
+      )
+    ) {
       output.innerHTML += `<div class="customMessage" style="color:#ff6e64">Wow that took long!</div>
-                          <div class="customMessage" style="color:#ff6e64">${longRunningJokes[Math.floor(Math.random() * longRunningJokes.length)]}</div>`;
+                        <div class="customMessage" style="color:#ff6e64">${longRunningJokes[Math.floor(Math.random() * longRunningJokes.length)]}</div>`;
+    }
+
+    output.scrollTo({
+      top: output.scrollHeight,
+      behavior: "smooth",
+    });
   } catch (e) {
-    output.innerHTML += `<div class="errorBox">
-      <div class="errorTitle">Error</div>
-      <div class="errorMessage">${e.message}</div>
-    </div>`;
+    try {
+      if (e.message == "too much recursion")
+        throwCustomError("Too Much Recursion!");
+    } catch (e) {}
   }
 }
 
@@ -356,7 +368,10 @@ function astToVisNodesEdges(
 
     nodes.push({
       id: valId,
-      label: `${node.value.value}`,
+      label:
+        node.value.type === "String"
+          ? `"${node.value.value}"`
+          : `${node.value.value}`,
       level: depth + 1,
       color: {
         background: valStyle.bg,

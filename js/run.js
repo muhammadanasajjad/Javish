@@ -44,10 +44,180 @@ function makeEnv(parent = null) {
           returnType: undefined,
         },
       ],
+      input: [
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "input",
+          call: async ({ prompt }) => {
+            printCustomMessage(prompt);
+            const value = await getCustomInput();
+            return { type: "String", value };
+          },
+          params: [{ type: "String", name: "prompt" }],
+          returnType: "String",
+        },
+      ],
+      Int: [
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "Int",
+          call: ({ value }) => ({ type: "Int", value: parseInt(value) }),
+          params: [{ type: "Float", name: "value" }],
+        },
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "Int",
+          call: ({ value }) => ({ type: "Int", value: parseInt(value) }),
+          params: [{ type: "String", name: "value" }],
+        },
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "Int",
+          call: ({ value }) => ({ type: "Int", value: value ? 1 : 0 }),
+          params: [{ type: "Boolean", name: "value" }],
+        },
+      ],
+      Float: [
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "Float",
+          call: ({ value }) => ({ type: "Float", value: parseFloat(value) }),
+          params: [{ type: "Int", name: "value" }],
+        },
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "Float",
+          call: ({ value }) => ({ type: "Float", value: parseFloat(value) }),
+          params: [{ type: "String", name: "value" }],
+        },
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "Float",
+          call: ({ value }) => ({ type: "Float", value: value ? 1.0 : 0.0 }),
+          params: [{ type: "Boolean", name: "value" }],
+        },
+      ],
+      String: [
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "String",
+          call: ({ value }) => ({ type: "String", value: value.toString() }),
+          params: [{ type: "Int", name: "value" }],
+        },
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "String",
+          call: ({ value }) => ({ type: "String", value: value.toString() }),
+          params: [{ type: "Float", name: "value" }],
+        },
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "String",
+          call: ({ value }) => ({ type: "String", value: value.toString() }),
+          params: [{ type: "Boolean", name: "value" }],
+        },
+      ],
+      Boolean: [
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "Boolean",
+          call: ({ value }) => ({ type: "Boolean", value: Boolean(value) }),
+          params: [{ type: "Int", name: "value" }],
+        },
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "Boolean",
+          call: ({ value }) => ({ type: "Boolean", value: Boolean(value) }),
+          params: [{ type: "Float", name: "value" }],
+        },
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "Boolean",
+          call: ({ value }) => ({
+            type: "Boolean",
+            value: value === "true" || value === true,
+          }),
+          params: [{ type: "String", name: "value" }],
+        },
+      ],
     },
     parent,
   };
 }
+
+const VALID_OPERATORS = {
+  "+": {
+    types: [["String", "Int", "Float"]],
+    operation: (l, r) => l + r,
+    getType: (lt, rt) =>
+      lt === "String" || rt === "String"
+        ? "String"
+        : lt === "Int" && rt === "Int"
+          ? "Int"
+          : "Float",
+  },
+  "-": {
+    types: [["Int", "Float"]],
+    operation: (l, r) => l - r,
+    getType: (lt, rt) => (lt === "Int" && rt === "Int" ? "Int" : "Float"),
+  },
+  "*": {
+    types: [["Int", "Float"]],
+    operation: (l, r) => l * r,
+    getType: (lt, rt) => (lt === "Int" && rt === "Int" ? "Int" : "Float"),
+  },
+  "/": {
+    types: [["Int", "Float"]],
+    operation: (l, r, lt, rt) =>
+      lt === "Int" && rt === "Int" ? Math.floor(l / r) : l / r,
+    getType: (lt, rt) => (lt === "Int" && rt === "Int" ? "Int" : "Float"),
+  },
+  "%": {
+    types: [["Int", "Float"]],
+    operation: (l, r) => l % r,
+    getType: (lt, rt) => (lt === "Int" && rt === "Int" ? "Int" : "Float"),
+  },
+  "<": {
+    types: [["Int", "Float"]],
+    operation: (l, r) => l < r,
+    getType: () => "Boolean",
+  },
+  ">": {
+    types: [["Int", "Float"]],
+    operation: (l, r) => l > r,
+    getType: () => "Boolean",
+  },
+  "<=": {
+    types: [["Int", "Float"]],
+    operation: (l, r) => l <= r,
+    getType: () => "Boolean",
+  },
+  ">=": {
+    types: [["Int", "Float"]],
+    operation: (l, r) => l >= r,
+    getType: () => "Boolean",
+  },
+  "==": {
+    types: [["Int", "Float"], ["Boolean"], ["String"]],
+    operation: (l, r) => l === r,
+    getType: () => "Boolean",
+  },
+  "!=": {
+    types: [["Int", "Float"], ["Boolean"], ["String"]],
+    operation: (l, r) => l !== r,
+    getType: () => "Boolean",
+  },
+  "||": {
+    types: [["Boolean"]],
+    operation: (l, r) => l || r,
+    getType: () => "Boolean",
+  },
+  "&&": {
+    types: [["Boolean"]],
+    operation: (l, r) => l && r,
+    getType: () => "Boolean",
+  },
+};
 
 function lookupVariable(env, name) {
   if (name in env.variables) return env.variables[name];
@@ -80,7 +250,6 @@ function lookupFunction(env, name, argTypes = []) {
 
 function run(node, env, fullCode) {
   if (node == null) throwCustomError("Node is undefined", node, fullCode);
-
   if (node.type === "Program") return runProgram(node, env, fullCode);
   if (node.type === "Assignment") return runAssignment(node, env, fullCode);
   if (node.type === "Declaration")
@@ -94,120 +263,39 @@ function run(node, env, fullCode) {
   if (node.type === "FunctionDeclaration")
     return runFunctionDeclaration(node, env, fullCode);
   if (node.type === "FunctionCall") return runFunctionCall(node, env, fullCode);
-  if (node.type === "ReturnStatement") {
+  if (node.type === "ReturnStatement")
     return runReturnStatement(node, env, fullCode);
-  }
-
   if (node.constructor === Array) {
-    for (let i = 0; i < node.length; i++) {
-      const result = run(node[i], env, fullCode);
+    for (const stmt of node) {
+      const result = run(stmt, env, fullCode);
       if (result && result.type === "Return") return result;
     }
     return;
   }
-
-  if (["String", "Boolean", "Float", "Int"].includes(node.type))
-    return runLiteral(node, fullCode);
-
+  if (["String", "Boolean", "Int", "Float"].includes(node.type))
+    return runLiteral(node);
   throwCustomError(`Unknown node type: ${node.type}`, node, fullCode);
 }
 
-function runLiteral(node, fullCode) {
+function runLiteral(node) {
   return { type: node.type, value: node.value };
 }
 
-function runIdentifier(node, env, fullCode) {
+function runIdentifier(node, env) {
   return lookupVariable(env, node.name);
 }
 
 function runBinaryExpr(node, env, fullCode) {
   const left = run(node.left, env, fullCode);
   const right = run(node.right, env, fullCode);
-
   const l = left.value;
   const r = right.value;
 
-  const validOperators = {
-    "+": {
-      types: [["String", "Int", "Float"]],
-      operation: (l, r) => l + r,
-      getType: (lt, rt) =>
-        lt === "String" || rt === "String"
-          ? "String"
-          : lt === "Int" && rt === "Int"
-            ? "Int"
-            : "Float",
-    },
-    "-": {
-      types: [["Int", "Float"]],
-      operation: (l, r) => l - r,
-      getType: (lt, rt) => (lt === "Int" && rt === "Int" ? "Int" : "Float"),
-    },
-    "*": {
-      types: [["Int", "Float"]],
-      operation: (l, r) => l * r,
-      getType: (lt, rt) => (lt === "Int" && rt === "Int" ? "Int" : "Float"),
-    },
-    "/": {
-      types: [["Int", "Float"]],
-      operation: (l, r, lt, rt) =>
-        lt === "Int" && rt === "Int" ? Math.floor(l / r) : l / r,
-      getType: (lt, rt) => (lt === "Int" && rt === "Int" ? "Int" : "Float"),
-    },
-    "%": {
-      types: [["Int", "Float"]],
-      operation: (l, r) => l % r,
-      getType: (lt, rt) => (lt === "Int" && rt === "Int" ? "Int" : "Float"),
-    },
-    "<": {
-      types: [["Int", "Float"]],
-      operation: (l, r) => l < r,
-      getType: () => "Boolean",
-    },
-    ">": {
-      types: [["Int", "Float"]],
-      operation: (l, r) => l > r,
-      getType: () => "Boolean",
-    },
-    "<=": {
-      types: [["Int", "Float"]],
-      operation: (l, r) => l <= r,
-      getType: () => "Boolean",
-    },
-    ">=": {
-      types: [["Int", "Float"]],
-      operation: (l, r) => l >= r,
-      getType: () => "Boolean",
-    },
-    "==": {
-      types: [["Int", "Float"], ["Boolean"], ["String"]],
-      operation: (l, r) => l === r,
-      getType: () => "Boolean",
-    },
-    "!=": {
-      types: [["Int", "Float"], ["Boolean"], ["String"]],
-      operation: (l, r) => l !== r,
-      getType: () => "Boolean",
-    },
-    "||": {
-      types: [["Boolean"]],
-      operation: (l, r) => l || r,
-      getType: () => "Boolean",
-    },
-    "&&": {
-      types: [["Boolean"]],
-      operation: (l, r) => l && r,
-      getType: () => "Boolean",
-    },
-  };
-
-  const op = validOperators[node.operator];
+  const op = VALID_OPERATORS[node.operator];
   if (!op)
     throwCustomError(`Unknown operator: ${node.operator}`, node, fullCode);
-
   const lt = left.type;
   const rt = right.type;
-
   let valid = false;
   for (const types of op.types) {
     if (types.includes(lt) && types.includes(rt)) {
@@ -215,37 +303,29 @@ function runBinaryExpr(node, env, fullCode) {
       break;
     }
   }
-
   if (!valid)
     throwCustomError(
       `No operator ${node.operator} defined for types ${lt} and ${rt}`,
       node,
       fullCode,
     );
-
-  const resultValue = op.operation(left.value, right.value, lt, rt);
-  const resultType = op.getType(lt, rt);
-
-  return { type: resultType, value: resultValue };
+  return { type: op.getType(lt, rt), value: op.operation(l, r, lt, rt) };
 }
 
 function runAssignment(node, env, fullCode) {
   const expression = run(node.value, env, fullCode);
   const existing = lookupVariable(env, node.name);
-
   if (existing.type != expression.type)
     throwCustomError(
       `${node.name} is of type ${existing.type} not ${expression.type}`,
       node,
       fullCode,
     );
-
   setVariable(env, node.name, { type: existing.type, value: expression.value });
 }
 
 function runVariableDeclaration(node, env, fullCode) {
   const expression = run(node.value, env, fullCode);
-
   if (env.variables[node.name] != null)
     throwCustomError(`Variable ${node.name} already exists`, node, fullCode);
   if (expression.type != node.varType)
@@ -254,24 +334,20 @@ function runVariableDeclaration(node, env, fullCode) {
       node,
       fullCode,
     );
-
   env.variables[node.name] = { type: node.varType, value: expression.value };
 }
 
 function runIfStatement(node, env, fullCode) {
   const cond = run(node.condition, env, fullCode);
-
   if (cond.type !== "Boolean")
     throwCustomError(
       `If statement requires type Boolean, type ${cond.type} was provided instead`,
       node,
       fullCode,
     );
-
   const localEnv = makeEnv(env);
-
   if (cond.value === true) return run(node.thenCase, localEnv, fullCode);
-  else if (node.elseCase) return run(node.elseCase, localEnv, fullCode);
+  if (node.elseCase) return run(node.elseCase, localEnv, fullCode);
 }
 
 function runWhileStatement(node, env, fullCode) {
@@ -284,13 +360,11 @@ function runWhileStatement(node, env, fullCode) {
 
 function runForStatement(node, env, fullCode) {
   const localEnv = makeEnv(env);
-  for (
-    run(node.init, localEnv, fullCode);
-    run(node.condition, localEnv, fullCode).value;
-    run(node.update, localEnv, fullCode)
-  ) {
+  run(node.init, localEnv, fullCode);
+  while (run(node.condition, localEnv, fullCode).value) {
     const result = run(node.body, makeEnv(localEnv), fullCode);
     if (result && result.type === "Return") return result;
+    run(node.update, localEnv, fullCode);
   }
 }
 
@@ -302,27 +376,21 @@ function runFunctionDeclaration(node, env, fullCode) {
 function runFunctionCall(node, env, fullCode) {
   const argValues = node.params.map((p) => run(p, env, fullCode));
   const argTypes = argValues.map((v) => v.type);
-
   const fn = lookupFunction(env, node.name, argTypes);
-
   const localEnv = makeEnv(env);
-
-  for (let i = 0; i < fn.params.length; i++) {
-    const paramName = fn.params[i].name;
-    localEnv.variables[paramName] = argValues[i];
-  }
-
+  for (let i = 0; i < fn.params.length; i++)
+    localEnv.variables[fn.params[i].name] = argValues[i];
   if (fn.type === "BUILTIN_FUNCTION") {
-    return fn.call(...Object.values(localEnv.variables));
+    const args = {};
+    for (let i = 0; i < fn.params.length; i++)
+      args[fn.params[i].name] = argValues[i].value;
+    return fn.call(args);
   }
-
   for (const stmt of fn.body) {
     const result = run(stmt, localEnv, fullCode);
-    if (result && result.type === "Return") {
+    if (result && result.type === "Return")
       return result.value ?? { type: "void", value: null };
-    }
   }
-
   return { type: "void", value: null };
 }
 
@@ -333,8 +401,6 @@ function runReturnStatement(node, env, fullCode) {
 
 function runProgram(node, env, fullCode) {
   let result;
-  for (const stmt of node.body) {
-    result = run(stmt, env, fullCode);
-  }
+  for (const stmt of node.body) result = run(stmt, env, fullCode);
   return result;
 }

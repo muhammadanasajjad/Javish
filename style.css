@@ -330,6 +330,28 @@ button:hover {
   border-left: 3px solid #3b4261;
   word-break: break-word;
 }
+.customInput {
+  background: transparent;
+  color: #a9b1d6;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  font-family: monospace;
+  border: none;
+  border-left: 3px solid #7aa2f7;
+  outline: none;
+  width: 95%;
+  box-sizing: border-box;
+  caret-color: #7aa2f7;
+}
+
+.customInput::placeholder {
+  color: #6c7086;
+}
+
+.customInput:focus {
+  border-left-color: #7aa2f7;
+  background: rgba(59, 66, 97, 0.1);
+}
 
 .resizable-vertical {
   position: relative;
