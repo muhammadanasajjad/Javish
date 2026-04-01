@@ -202,6 +202,10 @@ pre {
   font-style: italic;
 }
 
+.token.constructor-keyword {
+  color: #bb9af7;
+}
+
 .token.type-keyword {
   color: #2ac3de;
 }
@@ -263,6 +267,14 @@ pre {
 .token.comma,
 .token.dot {
   color: #737aa2;
+}
+
+.token.declaration-keyword {
+  color: #bb9af7;
+}
+
+.token.special-keyword {
+  color: #bb9af7;
 }
 
 .controls {

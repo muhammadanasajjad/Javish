@@ -16,14 +16,24 @@ function highlightTokenise(input) {
   const tokens = [];
   let pos = 0;
 
+  // TODO: ADD FULL FEATURE SET FOR FUTURE INCLUDED
   const highlightRules = [
     { matcher: /^\b(int|float|string|boolean|void)\b/, type: "type-keyword" },
-    { matcher: /^\b(if|else|for|while)\b/, type: "control-keyword" },
+    { matcher: /^\b(if|else|for|while|return)\b/, type: "control-keyword" },
+
+    { matcher: /^\binit\b/, type: "constructor-keyword" },
     { matcher: /^\b(class|struct|enum)\b/, type: "declaration-keyword" },
+
+    {
+      matcher: /^\bclass\s+([a-zA-Z_][a-zA-Z0-9_]*)/,
+      type: "class-declaration",
+    },
+
     {
       matcher: /^\b(public|private|protected|static|const|final)\b/,
       type: "modifier-keyword",
     },
+
     { matcher: /^\bnew\b/, type: "operator-new" },
     { matcher: /^\bthis\b/, type: "special-keyword" },
 
@@ -80,6 +90,20 @@ function highlightTokenise(input) {
   return tokens;
 }
 
+editor.addEventListener("keydown", (e) => {
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+
+    editor.value =
+      editor.value.substring(0, start) + "    " + editor.value.substring(end);
+
+    editor.selectionStart = editor.selectionEnd = start + 4;
+
+    updateHighlight();
+  }
+});
 editor.addEventListener("input", updateHighlight);
 editor.addEventListener("scroll", () => {
   highlighted.scrollTop = editor.scrollTop;
@@ -104,16 +128,8 @@ const palette = {
   "type-keyword": { bg: "#1a3a3a", border: "#2ac3de", text: "#2ac3de" },
   "control-keyword": { bg: "#2a1a3a", border: "#bb9af7", text: "#bb9af7" },
   identifier: { bg: "#23263a", border: "#a9b1d6", text: "#a9b1d6" },
-  "variable-identifier": {
-    bg: "#23263a",
-    border: "#c0caf5",
-    text: "#c0caf5",
-  },
-  "function-identifier": {
-    bg: "#23263a",
-    border: "#7aa2f7",
-    text: "#7aa2f7",
-  },
+  "variable-identifier": { bg: "#23263a", border: "#c0caf5", text: "#c0caf5" },
+  "function-identifier": { bg: "#23263a", border: "#7aa2f7", text: "#7aa2f7" },
   "function-call": { bg: "#23263a", border: "#7dcfff", text: "#7dcfff" },
   "function-declaration": {
     bg: "#23263a",
@@ -121,37 +137,39 @@ const palette = {
     text: "#7aa2f7",
     fontStyle: "italic",
   },
+  "constructor-keyword": { bg: "#23263a", border: "#bb9af7", text: "#bb9af7" },
+  "modifier-keyword": { bg: "#23263a", border: "#bb9af7", text: "#bb9af7" },
+  "special-keyword": { bg: "#23263a", border: "#bb9af7", text: "#bb9af7" },
+  "declaration-keyword": { bg: "#23263a", border: "#bb9af7", text: "#bb9af7" },
+  "return-keyword": { bg: "#23263a", border: "#bb9af7", text: "#bb9af7" },
+  "param-name": {
+    bg: "#23263a",
+    border: "#e0af68",
+    text: "#e0af68",
+    fontStyle: "italic",
+  },
+  "param-type": { bg: "#23263a", border: "#2ac3de", text: "#2ac3de" },
   "number-literal": { bg: "#3a2a1a", border: "#ff9e64", text: "#ff9e64" },
   "string-literal": { bg: "#1a2a1a", border: "#9ece6a", text: "#9ece6a" },
   "boolean-literal": { bg: "#3a2a1a", border: "#ff9e64", text: "#ff9e64" },
-  "operator-arithmetic": {
-    bg: "#1a2a3a",
-    border: "#89ddff",
-    text: "#89ddff",
-  },
-  "operator-comparison": {
-    bg: "#1a2a3a",
-    border: "#89ddff",
-    text: "#89ddff",
-  },
+  "operator-arithmetic": { bg: "#1a2a3a", border: "#89ddff", text: "#89ddff" },
+  "operator-comparison": { bg: "#1a2a3a", border: "#89ddff", text: "#89ddff" },
   "operator-logical": { bg: "#1a2a3a", border: "#89ddff", text: "#89ddff" },
-  "operator-assignment": {
-    bg: "#1a2a3a",
-    border: "#89ddff",
-    text: "#89ddff",
-  },
+  "operator-new": { bg: "#23263a", border: "#c0caf5", text: "#c0caf5" },
+  assignment: { bg: "#1a2a3a", border: "#89ddff", text: "#89ddff" },
   "comment-line": {
     bg: "#2a2a2a",
-    border: "#565f89",
-    text: "#565f89",
+    border: "#555",
+    text: "#888",
     fontStyle: "italic",
   },
   "comment-block": {
     bg: "#2a2a2a",
-    border: "#565f89",
-    text: "#565f89",
+    border: "#555",
+    text: "#888",
     fontStyle: "italic",
   },
+  punctuation: { bg: "#252535", border: "#737aa2", text: "#737aa2" },
   "brace-open": { bg: "#252535", border: "#737aa2", text: "#737aa2" },
   "brace-close": { bg: "#252535", border: "#737aa2", text: "#737aa2" },
   "paren-open": { bg: "#252535", border: "#737aa2", text: "#737aa2" },
@@ -167,7 +185,7 @@ function runCode() {
   try {
     const code = editor.value;
 
-    const tokens = tokenise(code);
+    const tokens = tokenise(code + "\n");
     const renderedTokens = highlightTokenise(code);
 
     const tvWrap = document.getElementById("tokens");
@@ -236,44 +254,46 @@ function runCode() {
 
     const env = makeEnv();
     const start = Date.now();
-    run(ast, env, code);
-    const end = Date.now();
-    const duration = end - start;
+    run(ast, env, code).then((val) => {
+      const end = Date.now();
+      const duration = end - start;
 
-    output.innerHTML += `<div class="customMessage" style="color:#6affb0">Finished</div>`;
-    output.innerHTML += `<div class="customMessage" style="color:#6affb0">Took ${duration}ms</div>`;
+      output.innerHTML += `<div class="customMessage" style="color:#6affb0">Finished</div>`;
+      output.innerHTML += `<div class="customMessage" style="color:#6affb0">Took ${duration}ms</div>`;
 
-    const longRunningJokes = [
-      "Maybe try using an actual language like HTML?!",
-      "Maybe try using a low level language like Assembly?!",
-      "This code is taking longer than my last vacation...",
-      "Patience is a virtue... but seriously, optimize your loops!",
-      "Still counting... maybe the CPU needs a nap...",
-      "This feels like writing assembly in your browser...",
-      "If this takes any longer, consider learning Python!",
-      "Congratulations! You've just summoned the slowest algorithm alive!",
-      "Is this code or modern art?",
-      "Waiting... maybe try C++ next time for fun!",
-      "This is slower than a snail on a sticky note...",
-      "Still running... don't forget to stretch your fingers!",
-      "Help! Maybe someone should optimise the interpreter!",
-    ];
-    if (
-      duration > 1000 &&
-      !tokens.some(
-        (t, i) =>
-          t.value === "input" && tokens[i + 1] && tokens[i + 1].value === "(",
-      )
-    ) {
-      output.innerHTML += `<div class="customMessage" style="color:#ff6e64">Wow that took long!</div>
-                        <div class="customMessage" style="color:#ff6e64">${longRunningJokes[Math.floor(Math.random() * longRunningJokes.length)]}</div>`;
-    }
+      const longRunningJokes = [
+        "Maybe try using an actual language like HTML?!",
+        "Maybe try using a low level language like Assembly?!",
+        "This code is taking longer than my last vacation...",
+        "Patience is a virtue... but seriously, optimize your loops!",
+        "Still counting... maybe the CPU needs a nap...",
+        "This feels like writing assembly in your browser...",
+        "If this takes any longer, consider learning Python!",
+        "Congratulations! You've just summoned the slowest algorithm alive!",
+        "Is this code or modern art?",
+        "Waiting... maybe try C++ next time for fun!",
+        "This is slower than a snail on a sticky note...",
+        "Still running... don't forget to stretch your fingers!",
+        "Help! Maybe someone should optimise the interpreter!",
+      ];
+      if (
+        duration > 1000 &&
+        !tokens.some(
+          (t, i) =>
+            t.value === "input" && tokens[i + 1] && tokens[i + 1].value === "(",
+        )
+      ) {
+        output.innerHTML += `<div class="customMessage" style="color:#ff6e64">Wow that took long!</div>
+                            <div class="customMessage" style="color:#ff6e64">${longRunningJokes[Math.floor(Math.random() * longRunningJokes.length)]}</div>`;
+      }
 
-    output.scrollTo({
-      top: output.scrollHeight,
-      behavior: "smooth",
+      output.scrollTo({
+        top: output.scrollHeight,
+        behavior: "smooth",
+      });
     });
   } catch (e) {
+    console.error(e);
     try {
       if (e.message == "too much recursion")
         throwCustomError("Too Much Recursion!");
@@ -291,16 +311,30 @@ function astToVisNodesEdges(
   const id = nodes.length;
 
   const nodeColorMap = {
+    NewExpression: "declaration-keyword",
+    ArrayDeclaration: "declaration-keyword",
+    NewArrayExpression: "declaration-keyword",
+    IndexExpression: "operator-arithmetic",
     FunctionDeclaration: "function-declaration",
+    MethodDeclaration: "function-declaration",
+    ClassDeclaration: "declaration-keyword",
+    ConstructorDeclaration: "constructor-keyword",
+    ObjectDeclaration: "declaration-keyword",
+    MemberAssignment: "assignment",
     FunctionCall: "function-call",
-    Declaration: "type-keyword",
-    Assignment: "operator-assignment",
+    MethodCall: "function-call",
+    ConstructorCall: "constructor-keyword",
+    Declaration: "declaration-keyword",
+    Assignment: "assignment",
+    IndexAssignment: "assignment",
     IfStatement: "control-keyword",
     WhileStatement: "control-keyword",
     ForStatement: "control-keyword",
-    ReturnStatement: "control-keyword",
+    ReturnStatement: "return-keyword",
     BinaryExpr: "operator-arithmetic",
     Identifier: "variable-identifier",
+    Param: "param-name",
+    Type: "param-type",
     Int: "number-literal",
     Float: "number-literal",
     String: "string-literal",
@@ -308,7 +342,14 @@ function astToVisNodesEdges(
   };
 
   const style = palette[nodeColorMap[node.type] || "unknown"];
-  const extraLabel = node.name ?? node.value ?? node.operator ?? "";
+  let extraLabel = node.name ?? node.value ?? node.operator ?? "";
+
+  if (node.type === "MemberAssignment") {
+    extraLabel = node.object + "." + node.property;
+  }
+  if (node.type === "IndexAssignment") {
+    extraLabel = "";
+  }
 
   nodes.push({
     id,
@@ -329,6 +370,13 @@ function astToVisNodesEdges(
   });
 
   if (parentId !== null) edges.push({ from: parentId, to: id });
+
+  if (node.type === "ObjectDeclaration" && node.value.params) {
+    node.value.params.forEach((c) =>
+      astToVisNodesEdges(c, id, nodes, edges, depth + 1),
+    );
+    return;
+  }
 
   if (node.body)
     node.body.forEach((c) =>
@@ -421,8 +469,20 @@ function renderAstGraph(ast) {
       font: { color: "#fff" },
       margin: 10,
     },
-    edges: { arrows: "to", color: "#aaa" },
-    physics: false,
+    edges: {
+      arrows: "to",
+      color: "#aaa",
+      smooth: {
+        type: "cubicBezier",
+        forceDirection: "none",
+      },
+    },
+    physics: {
+      enabled: true,
+      hierarchicalRepulsion: {
+        avoidOverlap: 1,
+      },
+    },
   };
 
   const network = new vis.Network(
@@ -431,19 +491,19 @@ function renderAstGraph(ast) {
     options,
   );
 
-  network.once("stabilizationIterationsDone", () => {
-    const positions = network.getPositions();
-    nodesDS.forEach((node) => {
-      node.x = positions[node.id].x;
-      node.y = positions[node.id].y;
-    });
-    nodesDS.update(nodesDS.get());
+  // network.once("stabilizationIterationsDone", () => {
+  //   const positions = network.getPositions();
+  //   nodesDS.forEach((node) => {
+  //     node.x = positions[node.id].x;
+  //     node.y = positions[node.id].y;
+  //   });
+  //   nodesDS.update(nodesDS.get());
 
-    network.setOptions({
-      physics: false,
-      layout: { hierarchical: false },
-    });
-  });
+  //   network.setOptions({
+  //     physics: false,
+  //     layout: { hierarchical: false },
+  //   });
+  // });
 
   const childrenMap = {};
   edges.forEach((edge) => {

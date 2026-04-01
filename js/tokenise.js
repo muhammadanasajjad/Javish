@@ -1,8 +1,10 @@
 const END = Symbol("END");
 
 const rules = [
-  { matcher: /\n/, type: "line-break" },
+  { matcher: /^\n/, type: "line-break" },
   { matcher: /[ \t]+/, type: null },
+  { matcher: /\/\//, type: "comment-line" },
+  { matcher: /\/\*|\*\//, type: "comment-block" },
 
   { matcher: /{/, type: "brace-open" },
   { matcher: /}/, type: "brace-close" },
@@ -50,6 +52,7 @@ const rules = [
   { matcher: /\bwhile\b/, type: "control-keyword" },
 
   { matcher: /\bclass\b/, type: "declaration-keyword" },
+  { matcher: /\binit\b/, type: "constructor-keyword" },
   { matcher: /\bstruct\b/, type: "declaration-keyword" },
   { matcher: /\benum\b/, type: "declaration-keyword" },
   { matcher: /\bpublic\b/, type: "modifier-keyword" },
@@ -62,11 +65,11 @@ const rules = [
 
   { matcher: /\bthis\b/, type: "special-keyword" },
 
-  { matcher: /\/\/[^\n]*/, type: "comment-line" },
-  { matcher: /\/\*[\s\S]*?\*\//, type: "comment-block" },
-
   { matcher: /[a-zA-Z_][a-zA-Z0-9_]*/, type: "identifier" },
+
+  { matcher: /^.+/, type: null },
 ];
+
 let testVariable;
 function tokenise(input, safeMode = true) {
   const tokens = [];
@@ -108,11 +111,11 @@ function tokenise(input, safeMode = true) {
           input[pos]
         }' at position ${pos} \n ${input.substring(
           Math.max(pos - 10, 0),
-          pos
+          pos,
         )}...${input[pos]}...${input.substring(
           pos + 1,
-          Math.min(pos + 10, input.length - 1)
-        )}`
+          Math.min(pos + 10, input.length - 1),
+        )}`,
       );
     }
 
