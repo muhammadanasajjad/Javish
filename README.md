@@ -1,48 +1,44 @@
-# Javish – A Simple Typed Interpreted Language
+# Javish
 
-**Javish** is a lightweight, typed programming language that runs entirely in the browser using pure JavaScript, HTML, and CSS. It’s designed to be simple, readable, and fun to experiment with—similar to C/Java syntax but with minimal overhead.
+Javish is a **custom interpreted programming language** based off of the Java syntax. It comes with a **web-based editor**, live **syntax highlighting**, a **token viewer**, and an **AST visualizer**.
 
----
+[**Try it out**](https://javish-interpreter.web.app/)
 
-## **Features**
+## Language Features
 
-- Strongly typed: `int`, `boolean`, `string`, `void`
-- Functions with recursion
-- Loops (`for`) and conditionals (`if/else`)
-- Arithmetic and logical operators
-- Printing to output via `print(value);`
-- No arrays, lists, or classes
-- Runs fully in the browser
+- **Basic Types:** `int`, `float`, `string`, `boolean`, `void`.
+- **Control Flow:** `if`, `else`, `for`, `while`, `return`.
+- **Classes & Constructors:** `class`, `init`.
+- **Functions & Methods:** Declare and call functions with automatic identifier highlighting.
+- **Operators:**
+  - Arithmetic: `+`, `-`, `*`, `/`, `%`
+  - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
+  - Logical: `&&`, `||`, `!`
+  - Special: `new`, `this`
+- **Comments:**
+  - Line comments: `//`
+  - Block comments: `/* ... */`
+- **Arrays:** 1D and 2D arrays with indexing and length access.
+- **Strings:** Indexing, concatenation, and length access.
+- **Input/Output:** `input()` and `print()` for interactive programs.
 
----
+## Documentation
 
-## **Syntax Example**
+Documentation with the full language feature set is available in [**DOCS.md**](https://github.com/muhammadanasajjad/Javish/blob/main/DOCS.md)
 
-```javish
-int a = 1;
-int b = 1;
+## Editor Features
 
-void fib(int n) {
-    if (n <= 0) {
-        return 0;
-    }
-    int next = a + b;
-    print(next);
-    a = b;
-    b = next;
-    fib(n - 1);
-}
+- **Live Syntax Highlighting:** Highlights keywords, types, operators, strings, numbers, and comments.
+- **Token Viewer:** See every token classified by type per line.
+- **AST Visualizer:** Graphically view the Abstract Syntax Tree for your code.
+- **Preset Examples:** Includes ready-to-run examples for arrays, strings, classes, encryption, and prime number checking.
 
-fib(10);
+## Getting Started
 
-boolean flag = true;
-if (flag) {
-    print(1);
-} else {
-    print(0);
-}
+1. Clone the repository:
+2. Open `index.html` in a web browser.
+3. Start typing Javish code in the editor and click the green "Run" button to execute.
 
-string greeting = "Hello";
-string name = "World";
-print(greeting + " " + name);
-```
+## Contributing
+
+Contributions, bug reports, and feature requests are welcome! Please fork the repository and submit a pull request.
