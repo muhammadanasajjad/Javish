@@ -9,7 +9,8 @@ body {
 }
 
 .sidebar {
-  width: 300px;
+  width: 35vw;
+  min-width: 300px;
   background: #1f2335;
   border-right: 1px solid #292e42;
   display: flex;
@@ -30,15 +31,46 @@ body {
   overflow: hidden;
 }
 
+.lineNumbers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 100%;
+  padding: 15px 7px;
+  box-sizing: border-box;
+
+  background: #1f2335;
+  color: #6c7086;
+
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.5;
+
+  text-align: right;
+  user-select: none;
+
+  border-right: 2px solid #292e42;
+
+  overflow: hidden;
+  z-index: 3;
+}
+
+.lineNumbers div {
+  height: 1.5em;
+}
+
 textarea,
 .editorWrapper > pre {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: 50px;
+  width: calc(100% - 50px);
   height: 100%;
   margin: 0;
   padding: 15px;
+  padding-left: 10px;
+
   font-family: monospace;
   font-size: 14px;
   line-height: 1.5;
@@ -288,10 +320,26 @@ button {
   border: 1px solid #3b4261;
   padding: 6px 12px;
   cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: all 0.1s ease;
+}
+
+#runBtn {
+  border-color: #4a9b58;
+  background-color: #213434;
+  color: #4a9b58;
+}
+
+#runBtn:hover {
+  background: #4a9b58;
+  color: #213434;
 }
 
 button:hover {
-  background: #3b4261;
+  background: #a9b1d6;
+  border-color: #a9b1d6;
+  color: #213434;
 }
 
 #output {
