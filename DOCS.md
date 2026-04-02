@@ -17,8 +17,6 @@ Javish is a simple, typed programming language that runs entirely in the browser
 - [Input / Output](#input--output)
 - [Examples](#examples)
 
----
-
 ## Basic Syntax
 
 Statements end with a semicolon `;`.  
@@ -30,8 +28,6 @@ Comments:
 /* Multi-line comment */
 ```
 
----
-
 ## Data Types
 
 - `int` — Integer numbers, e.g. `int x = 5;`
@@ -39,8 +35,6 @@ Comments:
 - `string` — Text, e.g. `string s = "hello";`
 - `boolean` — True/false, e.g. `boolean flag = true;`
 - `void` — No return value, e.g. `void foo() {}`
-
----
 
 ## Variables
 
@@ -58,15 +52,11 @@ Variables can be reassigned:
 age = 25;
 ```
 
----
-
 ## Operators
 
 - Arithmetic: `+`, `-`, `*`, `/`, `%`
 - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
 - Logical: `&&`, `||`, `!`
-
----
 
 ## Control Flow
 
@@ -98,8 +88,6 @@ for (int i = 0; i < 5; i = i + 1) {
 }
 ```
 
----
-
 ## Functions
 
 ```javish
@@ -118,8 +106,6 @@ Calling functions:
 greet("World");
 int sum = add(5, 3);
 ```
-
----
 
 ## Classes & Constructors
 
@@ -145,8 +131,6 @@ c.increment();
 c.show();
 ```
 
----
-
 ## Arrays
 
 ### 1D Arrays
@@ -163,8 +147,6 @@ int[][] matrix = new int[2][3];
 matrix[0][0] = 1;
 ```
 
----
-
 ## Input / Output
 
 ### Input
@@ -178,8 +160,6 @@ string name = input("Enter your name: ");
 ```javish
 print("Hello " + name);
 ```
-
----
 
 ## Examples
 
