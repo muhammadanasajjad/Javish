@@ -41,6 +41,7 @@ function makeEnv(parent = null) {
           params: [{ type: "Boolean", name: "value" }],
         },
       ],
+
       input: [
         {
           type: "BUILTIN_FUNCTION",
@@ -64,6 +65,35 @@ function makeEnv(parent = null) {
           returnType: "String",
         },
       ],
+
+      // ✅ NEW: ord
+      ord: [
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "ord",
+          call: async ({ value }) => {
+            if (value.length === 0)
+              throwCustomError("ord() requires a non-empty string");
+            return { type: "Int", value: value.charCodeAt(0) };
+          },
+          params: [{ type: "String", name: "value" }],
+          returnType: "Int",
+        },
+      ],
+
+      // ✅ NEW: chr
+      chr: [
+        {
+          type: "BUILTIN_FUNCTION",
+          name: "chr",
+          call: async ({ value }) => {
+            return { type: "String", value: String.fromCharCode(value) };
+          },
+          params: [{ type: "Int", name: "value" }],
+          returnType: "String",
+        },
+      ],
+
       int: [
         {
           type: "BUILTIN_FUNCTION",
@@ -84,6 +114,7 @@ function makeEnv(parent = null) {
           params: [{ type: "Boolean", name: "value" }],
         },
       ],
+
       float: [
         {
           type: "BUILTIN_FUNCTION",
@@ -113,6 +144,7 @@ function makeEnv(parent = null) {
           params: [{ type: "Boolean", name: "value" }],
         },
       ],
+
       string: [
         {
           type: "BUILTIN_FUNCTION",
@@ -142,6 +174,7 @@ function makeEnv(parent = null) {
           params: [{ type: "Boolean", name: "value" }],
         },
       ],
+
       boolean: [
         {
           type: "BUILTIN_FUNCTION",
@@ -349,7 +382,12 @@ function resolveIndexTarget(arrayVal, indices) {
 async function run(node, env, fullCode, thisEnv = null) {
   if (node == null) throwCustomError("Node is undefined", node, fullCode);
 
-  if (node.type === "CommentLine" || node.type === "CommentBlock") return;
+  if (
+    node.type === "CommentLine" ||
+    node.type === "CommentBlock" ||
+    node.type === "EmptyStatement"
+  )
+    return;
   if (node.type === "Program") return await runProgram(node, env, fullCode);
   if (node.type === "Assignment")
     return await runAssignment(node, env, fullCode, thisEnv);
@@ -473,6 +511,12 @@ async function runIndexExpression(node, env, fullCode, thisEnv) {
         node,
         fullCode,
       );
+    if (idx.value < 0 || idx.value >= obj.value.length)
+      throwCustomError(
+        `Index ${idx.value} out of bounds for string of length ${obj.value.length}`,
+        node,
+        fullCode,
+      );
     return (
       { type: "String", value: obj.value[idx.value] } || {
         type: "String",
@@ -579,6 +623,33 @@ async function runIndexAssignment(node, env, fullCode, thisEnv) {
   }
 
   const parentContainer = await resolveToParent(node.object.object);
+  if (parentContainer.type === "String") {
+    const idx = await run(node.object.index, env, fullCode, thisEnv);
+    if (idx.type !== "Int")
+      throwCustomError(
+        `String index must be Int, got '${idx.type}'`,
+        node,
+        fullCode,
+      );
+    if (idx.value < 0 || idx.value >= parentContainer.value.length)
+      throwCustomError(
+        `Index ${idx.value} out of bounds for string of length ${parentContainer.value.length}`,
+        node,
+        fullCode,
+      );
+
+    if (value.type !== "String" || value.value.length !== 1)
+      throwCustomError(
+        `Can only assign single-character strings to string indices, got '${value.type}' with length ${value.value.length}`,
+        node,
+        fullCode,
+      );
+    const strArr = parentContainer.value.split("");
+    strArr[idx.value] = value.value;
+    parentContainer.value = strArr.join("");
+    return;
+  }
+
   if (parentContainer.type !== "Array")
     throwCustomError(
       `Cannot index into non-array type '${parentContainer.type}'`,

@@ -129,5 +129,8 @@ function tokenise(input, safeMode = true) {
     }
   }
 
+  tokens.push({ type: "line-break", value: "", lineNumber: lineNumber + 1 });
+  console.log(tokens);
+
   return tokens;
 }

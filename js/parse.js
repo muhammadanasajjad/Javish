@@ -946,7 +946,11 @@ function parse(tokens, fullCode) {
   function parseStatement() {
     const { value: token, lineNumber: tokenLineNumber } = peek();
     let stmt;
-    if (token === "//") {
+
+    if (token === "") {
+      consume();
+      return { type: "EmptyStatement" };
+    } else if (token === "//") {
       const thisLineNumber = peek().lineNumber;
       consume("//");
       while (peek().lineNumber === thisLineNumber) {
