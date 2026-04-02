@@ -7,6 +7,7 @@ const runBtn = document.getElementById("runBtn");
 const clearBtn = document.getElementById("clearBtn");
 const divider = document.getElementById("divider");
 const sidebar = document.getElementById("sidebar");
+const lineNumbers = document.getElementById("lineNumbers");
 
 function escapeHTML(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -101,13 +102,19 @@ editor.addEventListener("keydown", (e) => {
 
     editor.selectionStart = editor.selectionEnd = start + 4;
 
+    updateLineNumbers();
     updateHighlight();
   }
 });
-editor.addEventListener("input", updateHighlight);
+
+editor.addEventListener("input", () => {
+  updateLineNumbers();
+  updateHighlight();
+});
 editor.addEventListener("scroll", () => {
   highlighted.scrollTop = editor.scrollTop;
   highlighted.scrollLeft = editor.scrollLeft;
+  lineNumbers.scrollTop = editor.scrollTop;
 });
 
 function updateHighlight() {
@@ -135,7 +142,6 @@ const palette = {
     bg: "#23263a",
     border: "#7aa2f7",
     text: "#7aa2f7",
-    fontStyle: "italic",
   },
   "constructor-keyword": { bg: "#23263a", border: "#bb9af7", text: "#bb9af7" },
   "modifier-keyword": { bg: "#23263a", border: "#bb9af7", text: "#bb9af7" },
@@ -146,7 +152,6 @@ const palette = {
     bg: "#23263a",
     border: "#e0af68",
     text: "#e0af68",
-    fontStyle: "italic",
   },
   "param-type": { bg: "#23263a", border: "#2ac3de", text: "#2ac3de" },
   "number-literal": { bg: "#3a2a1a", border: "#ff9e64", text: "#ff9e64" },
@@ -158,15 +163,15 @@ const palette = {
   "operator-new": { bg: "#23263a", border: "#c0caf5", text: "#c0caf5" },
   assignment: { bg: "#1a2a3a", border: "#89ddff", text: "#89ddff" },
   "comment-line": {
-    bg: "#2a2a2a",
-    border: "#555",
-    text: "#888",
+    bg: "#23273a",
+    border: "#565f89",
+    text: "#565f89",
     fontStyle: "italic",
   },
   "comment-block": {
-    bg: "#2a2a2a",
-    border: "#555",
-    text: "#888",
+    bg: "#23273a",
+    border: "#565f89",
+    text: "#565f89",
     fontStyle: "italic",
   },
   punctuation: { bg: "#252535", border: "#737aa2", text: "#737aa2" },
@@ -185,7 +190,7 @@ function runCode() {
   try {
     const code = editor.value;
 
-    const tokens = tokenise(code + "\n");
+    const tokens = tokenise(code);
     const renderedTokens = highlightTokenise(code);
 
     const tvWrap = document.getElementById("tokens");
@@ -587,4 +592,268 @@ document.querySelectorAll(".resizable-vertical").forEach((panel) => {
   });
 });
 
+function updateLineNumbers() {
+  const lines = editor.value.split("\n").length;
+
+  let html = "";
+  for (let i = 1; i <= lines; i++) {
+    html += `<div>${i}</div>`;
+  }
+
+  lineNumbers.innerHTML = html;
+}
+
+updateLineNumbers();
 updateHighlight();
+
+const presets = [
+  `// Sum of user input array
+int size = int(input("Enter array size: "));
+
+int[] arr = new int[size];
+int i = 0;
+
+while (i < arr.length) {
+  arr[i] = int(input("Enter number " + string(i) + ": "));
+  i = i + 1;
+}
+
+int sum = 0;
+i = 0;
+while (i < arr.length) {
+  sum = sum + arr[i];
+  i = i + 1;
+}
+
+print("Total: " + string(sum));`,
+
+  `// Reverse a string using indexing
+string s = input("Enter a string: ");
+
+string result = "";
+int i = s.length - 1;
+
+while (i >= 0) {
+  result = result + s[i];
+  i = i - 1;
+}
+
+print("Reversed: " + result);`,
+
+  `// 2D array (matrix) + sum
+int rows = int(input("Enter number of rows: "));
+int cols = int(input("Enter number of columns: "));
+
+int[][] matrix = new int[rows][cols];
+
+int i = 0;
+while (i < rows) {
+  int j = 0;
+  while (j < cols) {
+    matrix[i][j] = int(input("Enter value [" + string(i) + "][" + string(j) + "]: "));
+    j = j + 1;
+  }
+  i = i + 1;
+}
+
+int total = 0;
+i = 0;
+
+while (i < matrix.length) {
+  int j = 0;
+  while (j < matrix[i].length) {
+    total = total + matrix[i][j];
+    j = j + 1;
+  }
+  i = i + 1;
+}
+
+print("Matrix sum: " + string(total));`,
+
+  `// Simple class with methods and state
+class Counter {
+  int value = 0;
+
+  init Counter(int start) {
+    this.value = start;
+  }
+
+  void increment() {
+    this.value = this.value + 1;
+  }
+
+  void add(int x) {
+    this.value = this.value + x;
+  }
+
+  void show() {
+    print("Counter: " + string(this.value));
+  }
+}
+
+int start = int(input("Enter starting value: "));
+Counter c = new Counter(start);
+
+int addVal = int(input("Enter amount to add: "));
+c.increment();
+c.add(addVal);
+c.show();`,
+
+  `// Prime number checker
+int n = int(input("Enter a number: "));
+
+int i = 2;
+boolean isPrime = true;
+
+while (i < n) {
+  if ((n % i) == 0) {
+    isPrime = false;
+  }
+  i = i + 1;
+}
+
+if (isPrime) {
+  print("Prime");
+} else {
+  print("Not prime");
+}`,
+
+  `// Caesar-like encryption
+string msg = input("Enter message: ");
+int shift = int(input("Enter shift: "));
+
+string result = "";
+int i = 0;
+
+while (i < msg.length) {
+  int code = ord(msg[i]);
+  code = (code + shift) % 256;
+  result = result + chr(code);
+  i = i + 1;
+}
+
+print("Encrypted: " + result);
+
+// decrypt
+string decrypted = "";
+i = 0;
+
+while (i < result.length) {
+  int code = ord(result[i]);
+  code = (code - shift + 256) % 256;
+  decrypted = decrypted + chr(code);
+  i = i + 1;
+}
+
+print("Decrypted: " + decrypted);`,
+
+  `// Find max in array
+int size = int(input("Enter array size: "));
+int[] arr = new int[size];
+
+int i = 0;
+while (i < size) {
+  arr[i] = int(input("Enter number: "));
+  i = i + 1;
+}
+
+int max = arr[0];
+i = 1;
+
+while (i < arr.length) {
+  if (arr[i] > max) {
+    max = arr[i];
+  }
+  i = i + 1;
+}
+
+print("Max: " + string(max));`,
+
+  `// Nested arrays + lengths showcase
+int n = int(input("Enter grid size: "));
+int[][] grid = new int[n][n];
+
+int i = 0;
+while (i < grid.length) {
+  int j = 0;
+  while (j < grid[i].length) {
+    grid[i][j] = i * j;
+    j = j + 1;
+  }
+  i = i + 1;
+}
+
+print("Rows: " + string(grid.length));
+print("Cols: " + string(grid[0].length));`,
+
+  `// Run-Length Encoding (RLE) using strings
+string text = input("Enter text to compress: ");
+
+string result = "";
+int i = 0;
+
+while (i < text.length) {
+  string current = text[i];
+  int count = 1;
+  int j = i + 1;
+  while (j < text.length && text[j] == current) {
+    count = count + 1;
+    j = j + 1;
+  }
+  result = result + current + string(count);
+  i = j;
+}
+
+print("RLE: " + result);`,
+
+  `// Basic Diffie-Hellman demo
+int prime = int(input("Enter prime: "));
+int base = int(input("Enter base: "));
+int alicePrivate = int(input("Enter Alice private key: "));
+int bobPrivate = int(input("Enter Bob private key: "));
+
+int alicePublic = 1;
+int i = 0;
+while (i < alicePrivate) {
+  alicePublic = (alicePublic * base) % prime;
+  i = i + 1;
+}
+
+int bobPublic = 1;
+i = 0;
+while (i < bobPrivate) {
+  bobPublic = (bobPublic * base) % prime;
+  i = i + 1;
+}
+
+int aliceShared = 1;
+i = 0;
+while (i < alicePrivate) {
+  aliceShared = (aliceShared * bobPublic) % prime;
+  i = i + 1;
+}
+
+int bobShared = 1;
+i = 0;
+while (i < bobPrivate) {
+  bobShared = (bobShared * alicePublic) % prime;
+  i = i + 1;
+}
+
+print("Alice key: " + string(aliceShared));
+print("Bob key: " + string(bobShared));`,
+];
+
+function getRandomPreset() {
+  const index = Math.floor(Math.random() * presets.length);
+  return presets[index];
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  const editor = document.getElementById("editor");
+  if (editor.value === "" || presets.includes(editor.value))
+    editor.value = getRandomPreset();
+
+  updateLineNumbers();
+  updateHighlight();
+});
