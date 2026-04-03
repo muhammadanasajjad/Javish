@@ -107,7 +107,83 @@ editor.addEventListener("keydown", (e) => {
   }
 });
 
+function updateSidebar() {
+  try {
+    const code = editor.value;
+
+    const tokens = tokenise(code);
+    const renderedTokens = highlightTokenise(code);
+
+    const tvWrap = document.getElementById("tokens");
+    tvWrap.innerHTML = `<div class="tv-wrap">
+      <div class="tv-controls" id="tv-controls"></div>
+      <div class="tv-legend" id="tv-legend"></div>
+      <div class="tv-lines" id="tv-lines"></div>
+    </div>`;
+
+    const fallback = { bg: "#2a2a2a", border: "#555", text: "#888" };
+
+    function getStyle(type) {
+      return palette[type] || fallback;
+    }
+
+    function groupByLine(toks) {
+      const map = {};
+      let line = 1;
+      toks.forEach((t) => {
+        const lines = t.value.split("\n");
+        lines.forEach((part, idx) => {
+          if (!map[line]) map[line] = [];
+          map[line].push({ ...t, value: part });
+          if (idx < lines.length - 1) line++;
+        });
+      });
+      return map;
+    }
+
+    function renderTV() {
+      const byLine = groupByLine(renderedTokens);
+      const linesEl = document.getElementById("tv-lines");
+      linesEl.innerHTML = "";
+      for (const ln of Object.keys(byLine).sort((a, b) => a - b)) {
+        const row = document.createElement("div");
+        row.className = "tv-line";
+        const num = document.createElement("div");
+        num.className = "tv-linenum";
+        num.textContent = ln;
+        const toksEl = document.createElement("div");
+        toksEl.className = "tv-tokens";
+        for (const t of byLine[ln]) {
+          if (t.type === "line-break") continue;
+          if (t.type === "space") continue;
+          const s = getStyle(t.type);
+          const tok = document.createElement("span");
+          tok.className = "tv-tok";
+          tok.style.background = s.bg;
+          tok.style.borderColor = s.border;
+          tok.style.color = s.text;
+          if (s.fontStyle) tok.style.fontStyle = s.fontStyle;
+          tok.innerHTML = `${t.value}<span class="tv-type">${t.type}</span>`;
+          tok.title = t.type;
+          toksEl.appendChild(tok);
+        }
+        row.appendChild(num);
+        row.appendChild(toksEl);
+        linesEl.appendChild(row);
+      }
+    }
+
+    renderTV();
+
+    const ast = parse(tokens, code, false);
+    renderAstGraph(ast);
+  } catch (e) {
+    console.log(e.message);
+  }
+}
+
 editor.addEventListener("input", () => {
+  updateSidebar();
   updateLineNumbers();
   updateHighlight();
 });
@@ -603,257 +679,70 @@ function updateLineNumbers() {
   lineNumbers.innerHTML = html;
 }
 
-updateLineNumbers();
-updateHighlight();
-
-const presets = [
-  `// Sum of user input array
-int size = int(input("Enter array size: "));
-
-int[] arr = new int[size];
-int i = 0;
-
-while (i < arr.length) {
-  arr[i] = int(input("Enter number " + string(i) + ": "));
-  i = i + 1;
-}
-
-int sum = 0;
-i = 0;
-while (i < arr.length) {
-  sum = sum + arr[i];
-  i = i + 1;
-}
-
-print("Total: " + string(sum));`,
-
-  `// Reverse a string using indexing
-string s = input("Enter a string: ");
-
-string result = "";
-int i = s.length - 1;
-
-while (i >= 0) {
-  result = result + s[i];
-  i = i - 1;
-}
-
-print("Reversed: " + result);`,
-
-  `// 2D array (matrix) + sum
-int rows = int(input("Enter number of rows: "));
-int cols = int(input("Enter number of columns: "));
-
-int[][] matrix = new int[rows][cols];
-
-int i = 0;
-while (i < rows) {
-  int j = 0;
-  while (j < cols) {
-    matrix[i][j] = int(input("Enter value [" + string(i) + "][" + string(j) + "]: "));
-    j = j + 1;
-  }
-  i = i + 1;
-}
-
-int total = 0;
-i = 0;
-
-while (i < matrix.length) {
-  int j = 0;
-  while (j < matrix[i].length) {
-    total = total + matrix[i][j];
-    j = j + 1;
-  }
-  i = i + 1;
-}
-
-print("Matrix sum: " + string(total));`,
-
-  `// Simple class with methods and state
-class Counter {
-  int value = 0;
-
-  init Counter(int start) {
-    this.value = start;
-  }
-
-  void increment() {
-    this.value = this.value + 1;
-  }
-
-  void add(int x) {
-    this.value = this.value + x;
-  }
-
-  void show() {
-    print("Counter: " + string(this.value));
-  }
-}
-
-int start = int(input("Enter starting value: "));
-Counter c = new Counter(start);
-
-int addVal = int(input("Enter amount to add: "));
-c.increment();
-c.add(addVal);
-c.show();`,
-
-  `// Prime number checker
-int n = int(input("Enter a number: "));
-
-int i = 2;
-boolean isPrime = true;
-
-while (i < n) {
-  if ((n % i) == 0) {
-    isPrime = false;
-  }
-  i = i + 1;
-}
-
-if (isPrime) {
-  print("Prime");
-} else {
-  print("Not prime");
-}`,
-
-  `// Caesar-like encryption
-string msg = input("Enter message: ");
-int shift = int(input("Enter shift: "));
-
-string result = "";
-int i = 0;
-
-while (i < msg.length) {
-  int code = ord(msg[i]);
-  code = (code + shift) % 256;
-  result = result + chr(code);
-  i = i + 1;
-}
-
-print("Encrypted: " + result);
-
-// decrypt
-string decrypted = "";
-i = 0;
-
-while (i < result.length) {
-  int code = ord(result[i]);
-  code = (code - shift + 256) % 256;
-  decrypted = decrypted + chr(code);
-  i = i + 1;
-}
-
-print("Decrypted: " + decrypted);`,
-
-  `// Find max in array
-int size = int(input("Enter array size: "));
-int[] arr = new int[size];
-
-int i = 0;
-while (i < size) {
-  arr[i] = int(input("Enter number: "));
-  i = i + 1;
-}
-
-int max = arr[0];
-i = 1;
-
-while (i < arr.length) {
-  if (arr[i] > max) {
-    max = arr[i];
-  }
-  i = i + 1;
-}
-
-print("Max: " + string(max));`,
-
-  `// Nested arrays + lengths showcase
-int n = int(input("Enter grid size: "));
-int[][] grid = new int[n][n];
-
-int i = 0;
-while (i < grid.length) {
-  int j = 0;
-  while (j < grid[i].length) {
-    grid[i][j] = i * j;
-    j = j + 1;
-  }
-  i = i + 1;
-}
-
-print("Rows: " + string(grid.length));
-print("Cols: " + string(grid[0].length));`,
-
-  `// Run-Length Encoding (RLE) using strings
-string text = input("Enter text to compress: ");
-
-string result = "";
-int i = 0;
-
-while (i < text.length) {
-  string current = text[i];
-  int count = 1;
-  int j = i + 1;
-  while (j < text.length && text[j] == current) {
-    count = count + 1;
-    j = j + 1;
-  }
-  result = result + current + string(count);
-  i = j;
-}
-
-print("RLE: " + result);`,
-
-  `// Basic Diffie-Hellman demo
-int prime = int(input("Enter prime: "));
-int base = int(input("Enter base: "));
-int alicePrivate = int(input("Enter Alice private key: "));
-int bobPrivate = int(input("Enter Bob private key: "));
-
-int alicePublic = 1;
-int i = 0;
-while (i < alicePrivate) {
-  alicePublic = (alicePublic * base) % prime;
-  i = i + 1;
-}
-
-int bobPublic = 1;
-i = 0;
-while (i < bobPrivate) {
-  bobPublic = (bobPublic * base) % prime;
-  i = i + 1;
-}
-
-int aliceShared = 1;
-i = 0;
-while (i < alicePrivate) {
-  aliceShared = (aliceShared * bobPublic) % prime;
-  i = i + 1;
-}
-
-int bobShared = 1;
-i = 0;
-while (i < bobPrivate) {
-  bobShared = (bobShared * alicePublic) % prime;
-  i = i + 1;
-}
-
-print("Alice key: " + string(aliceShared));
-print("Bob key: " + string(bobShared));`,
-];
-
 function getRandomPreset() {
   const index = Math.floor(Math.random() * presets.length);
   return presets[index];
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  const editor = document.getElementById("editor");
   if (editor.value === "" || presets.includes(editor.value))
     editor.value = getRandomPreset();
 
+  updateSidebar();
   updateLineNumbers();
   updateHighlight();
 });
+
+if (editor.value === "" || presets.includes(editor.value))
+  editor.value = getRandomPreset();
+
+updateLineNumbers();
+updateHighlight();
+
+document.getElementById("toggle-docs").addEventListener("click", () => {
+  const nonDocs = document.getElementsByClassName("non-docs");
+  for (const el of nonDocs) {
+    el.style.display = el.style.display === "none" ? "block" : "none";
+  }
+
+  let docsDisplayed = false;
+  const docs = document.getElementsByClassName("docs");
+  for (const el of docs) {
+    el.style.display = el.style.display === "none" ? "block" : "none";
+    docsDisplayed = docsDisplayed || el.style.display === "block";
+  }
+
+  if (docsDisplayed) {
+    document.getElementById("toggle-docs").innerHTML =
+      `<span class="material-symbols-outlined">account_tree</span>`;
+  } else {
+    document.getElementById("toggle-docs").innerHTML =
+      `<span class="material-symbols-outlined">article</span>`;
+  }
+});
+
+const nonDocs = document.getElementsByClassName("non-docs");
+for (const el of nonDocs) {
+  el.style.display = "block";
+}
+
+const docs = document.getElementsByClassName("docs");
+for (const el of docs) {
+  el.style.display = "none";
+}
+
+const renderer = new marked.Renderer();
+
+renderer.heading = function ({ text, depth }) {
+  const slug = text.toLowerCase().replace(/[^\w]+/g, "-");
+
+  return `<h${depth} id="${slug}">${text}</h${depth}>`;
+};
+
+marked.setOptions({ renderer });
+
+fetch("DOCS.md")
+  .then((res) => res.text())
+  .then((md) => {
+    document.getElementById("docs-content").innerHTML = marked.parse(md);
+  });
