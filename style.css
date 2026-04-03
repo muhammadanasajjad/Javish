@@ -96,8 +96,8 @@ pre {
 }
 
 .sidebar > h2 {
-  padding-left: 10px;
-  margin-bottom: 0px;
+  padding-left: 20px;
+  margin-bottom: 10px;
   color: #c0caf5;
 }
 
@@ -185,12 +185,6 @@ pre {
   transition-delay: 0.25s;
 }
 
-.tv-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 1rem;
-}
 .tv-leg {
   display: flex;
   align-items: center;
@@ -454,16 +448,15 @@ button:hover {
   display: flex;
   flex-wrap: nowrap;
   overflow: auto;
-  gap: 10px;
   padding: 10px;
   transition: all 0.3s ease;
 }
 
 .feature-container {
   display: flex;
-  flex-wrap: nowrap;
-  overflow: auto;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 5px;
+  row-gap: 5px;
   margin-bottom: 10px;
 }
 
@@ -481,6 +474,7 @@ button:hover {
 #presets > button {
   border-radius: 10px;
   text-align: left;
+  margin-bottom: 10px;
 }
 
 #presets > button p {
@@ -488,7 +482,7 @@ button:hover {
 }
 
 #presets button.last {
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 }
 
 #preset-open span {
@@ -513,20 +507,25 @@ button:hover {
 }
 
 #preset-close {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: transparent;
   border: none;
   color: #a9b1d6;
   cursor: pointer;
   padding: 7px;
   border-radius: 5000px;
-  height: 50px;
-  width: 50px;
+  height: 30px;
+  width: 30px;
 }
 
 .preset-header {
   display: flex;
   padding-left: 15px;
+  padding-right: 15px;
   justify-content: space-between;
+  align-items: center;
 }
 
 #preset-close:hover {

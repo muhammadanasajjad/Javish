@@ -239,63 +239,143 @@ print("Bob key: " + string(bobShared));`,
 const presetDetails = [
   {
     name: "Sum of User Input Array",
-    featuresUsed: ["array", "while loop"],
     description:
       "Demonstrates creating an array, taking input from the user, iterating over it using a while loop, and calculating the sum.",
+    featuresUsed: [
+      { name: "array", bg: "#23263a", border: "#c0caf5", text: "#c0caf5" },
+      { name: "while loop", bg: "#2a1a3a", border: "#bb9af7", text: "#bb9af7" },
+    ],
   },
   {
     name: "Reverse a String",
-    featuresUsed: ["string indexing", "while loop"],
     description:
       "Shows how to access string characters by index and reverse a string using a while loop.",
+    featuresUsed: [
+      {
+        name: "string indexing",
+        bg: "#1a2a1a",
+        border: "#9ece6a",
+        text: "#9ece6a",
+      },
+      { name: "while loop", bg: "#2a1a3a", border: "#bb9af7", text: "#bb9af7" },
+    ],
   },
   {
     name: "2D Array Matrix Sum",
-    featuresUsed: ["2D array", "nested while loops"],
     description:
       "Illustrates creating a two-dimensional array (matrix), iterating through rows and columns with nested while loops, and summing all elements.",
+    featuresUsed: [
+      { name: "2D array", bg: "#23263a", border: "#c0caf5", text: "#c0caf5" },
+      {
+        name: "nested loops",
+        bg: "#2a1a3a",
+        border: "#bb9af7",
+        text: "#bb9af7",
+      },
+    ],
   },
   {
     name: "Simple Counter Class",
-    featuresUsed: ["class", "constructor", "methods", "state"],
     description:
       "Introduces classes, constructors, maintaining state with class properties, and defining methods to manipulate that state.",
+    featuresUsed: [
+      { name: "class", bg: "#1a3a3a", border: "#2ac3de", text: "#2ac3de" },
+      {
+        name: "constructor",
+        bg: "#23263a",
+        border: "#bb9af7",
+        text: "#bb9af7",
+      },
+      { name: "methods", bg: "#23263a", border: "#7aa2f7", text: "#7aa2f7" },
+      { name: "state", bg: "#23263a", border: "#a9b1d6", text: "#a9b1d6" },
+    ],
   },
   {
     name: "Prime Number Checker",
-    featuresUsed: ["while loop", "if statement", "boolean"],
     description:
       "Checks if a number is prime using a while loop and conditionals, while demonstrating the use of boolean flags.",
+    featuresUsed: [
+      { name: "while loop", bg: "#2a1a3a", border: "#bb9af7", text: "#bb9af7" },
+      {
+        name: "if statement",
+        bg: "#2a1a3a",
+        border: "#bb9af7",
+        text: "#bb9af7",
+      },
+      { name: "boolean", bg: "#3a2a1a", border: "#ff9e64", text: "#ff9e64" },
+    ],
   },
   {
     name: "Caesar-Like Encryption",
-    featuresUsed: ["string indexing", "ord/chr", "while loop"],
     description:
-      "Shows how to encode and decode a message using string indexing, ASCII code conversion (ord/chr), and loops.",
+      "Shows how to encode and decode a message using string indexing, ASCII conversion, and loops.",
+    featuresUsed: [
+      {
+        name: "string indexing",
+        bg: "#1a2a1a",
+        border: "#9ece6a",
+        text: "#9ece6a",
+      },
+      { name: "ord/chr", bg: "#23263a", border: "#7dcfff", text: "#7dcfff" },
+      { name: "while loop", bg: "#2a1a3a", border: "#bb9af7", text: "#bb9af7" },
+    ],
   },
   {
     name: "Find Max in Array",
-    featuresUsed: ["array", "while loop", "if statement"],
     description:
       "Finds the maximum value in an array using iteration and conditional statements.",
+    featuresUsed: [
+      { name: "array", bg: "#23263a", border: "#c0caf5", text: "#c0caf5" },
+      { name: "while loop", bg: "#2a1a3a", border: "#bb9af7", text: "#bb9af7" },
+      {
+        name: "if statement",
+        bg: "#2a1a3a",
+        border: "#bb9af7",
+        text: "#bb9af7",
+      },
+    ],
   },
   {
     name: "Nested Arrays & Lengths",
-    featuresUsed: ["2D array", "nested while loops"],
     description:
       "Demonstrates creating nested arrays and accessing their length properties while iterating with nested loops.",
+    featuresUsed: [
+      { name: "2D array", bg: "#23263a", border: "#c0caf5", text: "#c0caf5" },
+      {
+        name: "nested loops",
+        bg: "#2a1a3a",
+        border: "#bb9af7",
+        text: "#bb9af7",
+      },
+    ],
   },
   {
     name: "Run-Length Encoding (RLE)",
-    featuresUsed: ["string indexing", "nested while loops"],
     description:
-      "Implements a basic run-length encoding algorithm using string indexing and nested loops to compress repeated characters.",
+      "Implements a basic run-length encoding algorithm using string indexing and nested loops.",
+    featuresUsed: [
+      {
+        name: "string indexing",
+        bg: "#1a2a1a",
+        border: "#9ece6a",
+        text: "#9ece6a",
+      },
+      {
+        name: "nested loops",
+        bg: "#2a1a3a",
+        border: "#bb9af7",
+        text: "#bb9af7",
+      },
+    ],
   },
   {
     name: "Basic Diffie-Hellman Demo",
-    featuresUsed: ["while loop", "modulus operator"],
     description:
-      "Simulates a basic Diffie-Hellman key exchange to demonstrate loops and modular arithmetic in practice.",
+      "Simulates a basic Diffie-Hellman key exchange to demonstrate loops and modular arithmetic.",
+    featuresUsed: [
+      { name: "while loop", bg: "#2a1a3a", border: "#bb9af7", text: "#bb9af7" },
+      { name: "modulus", bg: "#1a2a3a", border: "#89ddff", text: "#89ddff" },
+    ],
   },
 ];
 
@@ -308,12 +388,14 @@ for (let i = 0; i < presets.length; i++) {
   let featuresHTML = "";
   for (let j = 0; j < details.featuresUsed.length; j++) {
     const feature = details.featuresUsed[j];
-    featuresHTML += `<div class="feature">${feature}</div>`;
+    featuresHTML += `<div class="feature" style="background-color: ${feature.bg}; border-color: ${feature.border}; color: ${feature.text}">${feature.name}</div>`;
   }
   button.innerHTML = `<h3>${details.name}</h3><div class="feature-container">${featuresHTML}</div><p>${details.description}</p>`;
   button.addEventListener("click", () => {
     editor.value = preset;
     updateHighlight();
+    updateSidebar();
+    updateLineNumbers();
   });
   presetContainer.appendChild(button);
 }
