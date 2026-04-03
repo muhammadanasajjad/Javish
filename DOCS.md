@@ -2,7 +2,7 @@
 
 ## Overview
 
-Javish is a simple, typed programming language that runs entirely in the browser using pure JavaScript, HTML, and CSS via a custom interpreter. It's designed to be readable and fun — similar to Java syntax.
+Javish is a simple, typed programming language that runs entirely in the browser using pure JavaScript, HTML, and CSS via a custom interpreter. It's designed to be readable and fun - similar to Java syntax.
 
 ## Table of Contents
 
@@ -12,9 +12,9 @@ Javish is a simple, typed programming language that runs entirely in the browser
 - [Operators](#operators)
 - [Control Flow](#control-flow)
 - [Functions](#functions)
-- [Classes & Constructors](#classes--constructors)
+- [Classes and Constructors](#classes-and-constructors)
 - [Arrays](#arrays)
-- [Input / Output](#input--output)
+- [Built-in Functions](#built-in-functions)
 - [Examples](#examples)
 
 ## Basic Syntax
@@ -30,11 +30,11 @@ Comments:
 
 ## Data Types
 
-- `int` — Integer numbers, e.g. `int x = 5;`
-- `float` — Decimal numbers, e.g. `float pi = 3.14;`
-- `string` — Text, e.g. `string s = "hello";`
-- `boolean` — True/false, e.g. `boolean flag = true;`
-- `void` — No return value, e.g. `void foo() {}`
+- `int` - Integer numbers, e.g. `int x = 5;`
+- `float` - Decimal numbers, e.g. `float pi = 3.14;`
+- `string` - Text, e.g. `string s = "hello";`
+- `boolean` - True/false, e.g. `boolean flag = true;`
+- `void` - No return value, e.g. `void foo() {}`
 
 ## Variables
 
@@ -107,7 +107,7 @@ greet("World");
 int sum = add(5, 3);
 ```
 
-## Classes & Constructors
+## Classes and Constructors
 
 ```javish
 class Counter {
@@ -147,18 +147,86 @@ int[][] matrix = new int[2][3];
 matrix[0][0] = 1;
 ```
 
-## Input / Output
+## Built-in Functions
 
-### Input
+Javish includes several built-in functions for input/output, type conversion, and character handling.
+
+### print
+
+Outputs a value to the console.
+
+```javish
+print("Hello World");
+print(10);
+print(3.14);
+print(true);
+```
+
+### input
+
+Reads user input as a string.
 
 ```javish
 string name = input("Enter your name: ");
+string value = input();
 ```
 
-### Output
+### ord
+
+Returns the ASCII/Unicode value of the first character in a string.
 
 ```javish
-print("Hello " + name);
+int code = ord("A"); // 65
+```
+
+### chr
+
+Converts an integer into its corresponding character.
+
+```javish
+string letter = chr(65); // "A"
+```
+
+### Type Conversions
+
+#### int
+
+Converts a value to an integer.
+
+```javish
+int a = int(3.7);
+int b = int("42");
+int c = int(true);
+```
+
+#### float
+
+Converts a value to a float.
+
+```javish
+float a = float(5);
+float b = float("3.14");
+float c = float(false);
+```
+
+#### string
+
+Converts a value to a string.
+
+```javish
+string a = string(10);
+string b = string(3.14);
+string c = string(true);
+```
+
+#### boolean
+
+Converts a value to a boolean.
+
+```javish
+boolean a = boolean(1);
+boolean b = boolean(0);
+boolean c = boolean("true");
 ```
 
 ## Examples
