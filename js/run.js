@@ -81,7 +81,6 @@ function makeEnv(parent = null) {
         },
       ],
 
-      // ✅ NEW: chr
       chr: [
         {
           type: "BUILTIN_FUNCTION",
@@ -274,11 +273,15 @@ const validOperators = {
   "||": {
     types: [["Boolean"]],
     operation: (l, r) => l || r,
+    stopsEvaluation: (l) => l === true,
+    stopEvaluationReturnValue: { type: "Boolean", value: true },
     getType: () => "Boolean",
   },
   "&&": {
     types: [["Boolean"]],
     operation: (l, r) => l && r,
+    stopsEvaluation: (l) => l === false,
+    stopEvaluationReturnValue: { type: "Boolean", value: false },
     getType: () => "Boolean",
   },
 };
@@ -848,11 +851,16 @@ async function runMethodCall(node, env, fullCode, thisEnv) {
 
 async function runBinaryExpr(node, env, fullCode, thisEnv = null) {
   const left = await run(node.left, env, fullCode, thisEnv);
-  const right = await run(node.right, env, fullCode, thisEnv);
 
   const op = validOperators[node.operator];
   if (!op)
     throwCustomError(`Unknown operator: ${node.operator}`, node, fullCode);
+
+  if (op.stopsEvaluation && op.stopsEvaluation(left.value)) {
+    return op.stopEvaluationReturnValue;
+  }
+
+  const right = await run(node.right, env, fullCode, thisEnv);
 
   const lt = left.type;
   const rt = right.type;
