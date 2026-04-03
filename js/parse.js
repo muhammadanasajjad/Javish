@@ -1,4 +1,4 @@
-function parse(tokens, fullCode) {
+function parse(tokens, fullCode, displayErrors = true) {
   const identifierRegex = /^[a-zA-Z]\w*$/;
   const typeKeywords = ["int", "string", "boolean", "float"];
   const typeNameMap = {
@@ -33,6 +33,7 @@ function parse(tokens, fullCode) {
         `Expected '${expected}', got '${tokens[pos].value}'`,
         tokens[pos],
         fullCode,
+        displayErrors,
       );
     return tokens[pos++];
   }
@@ -121,6 +122,7 @@ function parse(tokens, fullCode) {
           `Expected class name after 'new', got '${className}'`,
           tokens[pos],
           fullCode,
+          displayErrors,
         );
       const params = parseCallArgs();
       return {
@@ -140,6 +142,7 @@ function parse(tokens, fullCode) {
           `Expected property name after 'this.', got '${prop}'`,
           tokens[pos],
           fullCode,
+          displayErrors,
         );
       if (peek() && peek().value === "(") {
         const params = parseCallArgs();
@@ -234,6 +237,7 @@ function parse(tokens, fullCode) {
             `Expected property name after '.', got '${member}'`,
             tokens[pos],
             fullCode,
+            displayErrors,
           );
         if (peek() && peek().value === "(") {
           const params = parseCallArgs();
@@ -262,7 +266,12 @@ function parse(tokens, fullCode) {
       consume(")");
       return expr;
     }
-    throwCustomError(`Unexpected token '${token}'`, tokens[pos], fullCode);
+    throwCustomError(
+      `Unexpected token '${token}'`,
+      tokens[pos],
+      fullCode,
+      displayErrors,
+    );
   }
 
   function parseIndexSuffix(node, lineNumber) {
@@ -501,11 +510,21 @@ function parse(tokens, fullCode) {
   function parseDeclaration() {
     const { value: typeName, lineNumber } = consume();
     if (!typeKeywords.includes(typeName)) {
-      throwCustomError(`Unknown type '${typeName}'`, tokens[pos], fullCode);
+      throwCustomError(
+        `Unknown type '${typeName}'`,
+        tokens[pos],
+        fullCode,
+        displayErrors,
+      );
     }
     const name = consume().value;
     if (!identifierRegex.test(name))
-      throwCustomError(`Invalid identifier '${name}'`, tokens[pos], fullCode);
+      throwCustomError(
+        `Invalid identifier '${name}'`,
+        tokens[pos],
+        fullCode,
+        displayErrors,
+      );
     consume("=");
     const value = prattParseExpression();
     return {
@@ -528,7 +547,12 @@ function parse(tokens, fullCode) {
     }
     const name = consume().value;
     if (!identifierRegex.test(name))
-      throwCustomError(`Invalid identifier '${name}'`, tokens[pos], fullCode);
+      throwCustomError(
+        `Invalid identifier '${name}'`,
+        tokens[pos],
+        fullCode,
+        displayErrors,
+      );
     consume("=");
     const value = prattParseExpression();
     return {
@@ -545,7 +569,12 @@ function parse(tokens, fullCode) {
     const { value: className, lineNumber } = consume();
     const name = consume().value;
     if (!identifierRegex.test(name))
-      throwCustomError(`Invalid identifier '${name}'`, tokens[pos], fullCode);
+      throwCustomError(
+        `Invalid identifier '${name}'`,
+        tokens[pos],
+        fullCode,
+        displayErrors,
+      );
     consume("=");
     const value = prattParseExpression();
     return {
@@ -861,6 +890,7 @@ function parse(tokens, fullCode) {
       `Unexpected token '${token}' inside class body`,
       tokens[pos],
       fullCode,
+      displayErrors,
     );
   }
 

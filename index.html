@@ -2,20 +2,44 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Interpreter IDE</title>
+    <title>Javish Interpreter</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/x-icon" href="/assets/logo.svg" />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/vis-network/styles/vis-network.min.css"
     />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vis-network/dist/vis-network.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_tree,arrow_back_ios,article,close,code"
+    />
   </head>
   <body>
     <div id="sidebar" class="sidebar">
-      <h2>Tokens</h2>
-      <div id="tokens" class="panel"></div>
-      <h2>Parsed Tree (AST)</h2>
-      <div id="ast" class="panel"></div>
+      <div class="title-card">
+        <div class="title-container">
+          <img
+            src="/assets/logo.svg"
+            alt="Logo"
+            class="logo"
+            width="32px"
+            height="32px"
+          />
+          <h1>Javish Interpreter</h1>
+        </div>
+        <button id="toggle-docs" class="toggle-docs">
+          <span class="material-symbols-outlined"> article </span>
+        </button>
+      </div>
+      <h2 class="non-docs">Tokens</h2>
+      <div id="tokens" class="panel non-docs"></div>
+      <h2 class="non-docs">Parsed Tree (AST)</h2>
+      <div id="ast" class="panel non-docs"></div>
+      <div id="docs" class="panel docs">
+        <div id="docs-content" class="markdown"></div>
+      </div>
     </div>
     <div id="divider"></div>
     <div class="main">
@@ -32,7 +56,19 @@
         </div>
         <div id="output"></div>
       </div>
+      <div id="presets">
+        <div class="preset-header">
+          <h2>Presets</h2>
+          <button id="preset-close">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      </div>
+      <button id="preset-open">
+        <span class="material-symbols-outlined">arrow_back_ios</span>
+      </button>
     </div>
+    <script src="js/presets.js"></script>
     <script src="js/tokenise.js"></script>
     <script src="js/parse.js"></script>
     <script src="js/run.js"></script>
