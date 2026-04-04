@@ -683,7 +683,8 @@ function parse(tokens, fullCode, displayErrors = true) {
   }
 
   function parseFunctionDeclaration() {
-    const { value: returnType } = peek();
+    const returnTypeObj = peek();
+    const { value: returnType } = returnTypeObj;
     consume(returnType);
     let returnDims = 0;
     while (peek() && peek().value === "[" && peek(1) && peek(1).value === "]") {
@@ -730,6 +731,7 @@ function parse(tokens, fullCode, displayErrors = true) {
     }
     return {
       type: "FunctionDeclaration",
+      lineNumber: returnTypeObj.lineNumber,
       name,
       params,
       body,
@@ -738,7 +740,8 @@ function parse(tokens, fullCode, displayErrors = true) {
   }
 
   function parseMethodDeclaration() {
-    const { value: returnType } = peek();
+    const returnTypeObj = peek();
+    const { value: returnType } = returnTypeObj;
     consume(returnType);
     let returnDims = 0;
     while (peek() && peek().value === "[" && peek(1) && peek(1).value === "]") {
@@ -785,6 +788,7 @@ function parse(tokens, fullCode, displayErrors = true) {
     }
     return {
       type: "MethodDeclaration",
+      lineNumber: returnTypeObj.lineNumber,
       name,
       params,
       body,
@@ -794,7 +798,8 @@ function parse(tokens, fullCode, displayErrors = true) {
 
   function parseClassDeclaration() {
     consume("class");
-    const name = consume().value;
+    const nameObj = consume();
+    const name = nameObj.value;
     const body = [];
     consume("{");
     while (peek().value !== "}") {
@@ -803,27 +808,28 @@ function parse(tokens, fullCode, displayErrors = true) {
     consume("}");
     return {
       type: "ClassDeclaration",
+      lineNumber: nameObj.lineNumber,
       name,
       body,
     };
   }
 
   function parseClassMember() {
-    const { value: token } = peek();
+    const { value: token, lineNumber } = peek();
     if (token === "//") {
       const thisLineNumber = peek().lineNumber;
       consume("//");
       while (peek().lineNumber === thisLineNumber) {
         console.log(consume());
       }
-      return { type: "CommentLine" };
+      return { type: "CommentLine", lineNumber };
     } else if (token === "/*") {
       consume("/*");
       while (peek().value !== "*/") {
         console.log(consume());
       }
       consume("*/");
-      return { type: "CommentBlock" };
+      return { type: "CommentBlock", lineNumber };
     }
     if (token === "init") {
       return parseConstructorDeclaration();
@@ -896,7 +902,8 @@ function parse(tokens, fullCode, displayErrors = true) {
 
   function parseConstructorDeclaration() {
     consume("init");
-    const constructorName = consume().value;
+    const constructorNameObj = consume();
+    const constructorName = constructorNameObj.value;
     consume("(");
     const params = [];
     while (peek().value !== ")") {
@@ -936,6 +943,7 @@ function parse(tokens, fullCode, displayErrors = true) {
     return {
       type: "ConstructorDeclaration",
       name: constructorName,
+      lineNumber: constructorNameObj.lineNumber,
       params,
       body,
     };

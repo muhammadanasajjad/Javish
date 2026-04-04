@@ -1,5 +1,5 @@
-function makeEnv(parent = null) {
-  return {
+function makeEnv(parent = null, copy = null) {
+  const defaultEnv = {
     variables: {},
     classes: {},
     functions: {
@@ -66,7 +66,6 @@ function makeEnv(parent = null) {
         },
       ],
 
-      // ✅ NEW: ord
       ord: [
         {
           type: "BUILTIN_FUNCTION",
@@ -206,6 +205,43 @@ function makeEnv(parent = null) {
     },
     parent,
   };
+
+  if (copy) {
+    for (const key in copy.variables || {}) {
+      if (!(key in defaultEnv.variables)) {
+        defaultEnv.variables[key] = structuredClone(copy.variables[key]);
+      }
+    }
+
+    for (const key in copy.classes || {}) {
+      if (!(key in defaultEnv.classes)) {
+        defaultEnv.classes[key] = structuredClone(copy.classes[key]);
+      }
+    }
+
+    for (const key in copy.functions || {}) {
+      if (!(key in defaultEnv.functions)) {
+        defaultEnv.functions[key] = structuredClone(copy.functions[key]);
+      } else {
+        const existing = defaultEnv.functions[key];
+        const incoming = copy.functions[key];
+
+        for (const fn of incoming) {
+          const alreadyExists = existing.some(
+            (e) =>
+              e.params.length === fn.params.length &&
+              e.params.every((p, i) => p.type === fn.params[i].type),
+          );
+
+          if (!alreadyExists) {
+            existing.push(structuredClone(fn));
+          }
+        }
+      }
+    }
+  }
+
+  return defaultEnv;
 }
 
 const validOperators = {
@@ -302,14 +338,11 @@ function paramsMatch(fParams, argTypes, argValues) {
   if (!fParams) return true;
   if (fParams.length !== argTypes.length) return false;
   return fParams.every((p, i) => {
-    // Array parameter: p has dims > 0, argument type is "Array"
     if (p.dims && p.dims > 0) {
       if (argTypes[i] !== "Array") return false;
       const argVal = argValues[i];
       if (!argVal) return true;
-      // Match base type
       if (argVal.baseName != null && argVal.baseName !== p.type) return false;
-      // Match dimensionality
       if (argVal.dims != null && argVal.dims !== p.dims) return false;
       return true;
     }
@@ -332,10 +365,12 @@ function lookupFunction(env, name, argTypes = [], argValues = []) {
   throwCustomError(`Function '${name}' is not yet defined`);
 }
 
-function lookupClass(env, name) {
+function lookupClass(env, name, showError = false) {
   if (env.classes && name in env.classes) return env.classes[name];
   if (env.parent) return lookupClass(env.parent, name);
-  throwCustomError(`Class '${name}' is not defined`);
+
+  if (showError) throwCustomError(`Class '${name}' is not defined`);
+  else throw new Error(`Class '${name}' is not defined`);
 }
 
 const defaultValues = {
@@ -385,6 +420,7 @@ function resolveIndexTarget(arrayVal, indices) {
 async function run(node, env, fullCode, thisEnv = null) {
   if (node == null) throwCustomError("Node is undefined", node, fullCode);
 
+  console.log(node.type);
   if (
     node.type === "CommentLine" ||
     node.type === "CommentBlock" ||
@@ -477,6 +513,16 @@ async function runNewArrayExpression(node, env, fullCode, thisEnv) {
   return { type: "Array", value: arr };
 }
 
+function getArrayDimensions(node) {
+  if (node.type != "Array") return 0;
+  return 1 + getArrayDimensions(node.value[0]);
+}
+
+function getArrayType(node) {
+  if (node.type != "Array") return node.type;
+  return getArrayType(node.value[0]);
+}
+
 async function runArrayDeclaration(node, env, fullCode, thisEnv) {
   if (
     node.value.type === "NewArrayExpression" &&
@@ -487,13 +533,34 @@ async function runArrayDeclaration(node, env, fullCode, thisEnv) {
       node,
       fullCode,
     );
+
   const arrVal = await run(node.value, env, fullCode, thisEnv);
+
   if (arrVal.type !== "Array")
     throwCustomError(
       `Expected an array for '${node.name}', got '${arrVal.type}'`,
       node,
       fullCode,
     );
+
+  const valType = getArrayType(arrVal);
+  if (valType !== node.baseName) {
+    throwCustomError(
+      `Cannot assign a '${valType}' array to a '${node.baseName}' array`,
+      node,
+      fullCode,
+    );
+  }
+
+  const valDimensions = getArrayDimensions(arrVal);
+  if (valDimensions !== node.dims) {
+    throwCustomError(
+      `Cannot assign a ${valDimensions}-dimensional array to a ${node.dims}-dimensional '${node.baseName}' array`,
+      node,
+      fullCode,
+    );
+  }
+
   if (env.variables[node.name] != null)
     throwCustomError(`Variable '${node.name}' already exists`, node, fullCode);
   env.variables[node.name] = {
@@ -726,10 +793,17 @@ async function runMemberExpression(node, env, fullCode, thisEnv) {
 }
 
 async function runMemberAssignment(node, env, fullCode, thisEnv) {
+  console.log(thisEnv);
   if (node.object === "this") {
     if (!thisEnv)
       throwCustomError(
         `'this' used outside of a class method or constructor`,
+        node,
+        fullCode,
+      );
+    if (thisEnv.variables[node.property] == null)
+      throwCustomError(
+        `Property '${node.property}' does not exist on this`,
         node,
         fullCode,
       );
@@ -901,10 +975,13 @@ async function runAssignment(node, env, fullCode, thisEnv = null) {
 }
 
 async function runVariableDeclaration(node, env, fullCode, thisEnv = null) {
+  if (env.variables[node.name] != null) {
+    throwCustomError(`Variable ${node.name} already exists`, node, fullCode);
+  }
+  env.variables[node.name] = { type: null, value: null };
+
   const expression = await run(node.value, env, fullCode, thisEnv);
 
-  if (env.variables[node.name] != null)
-    throwCustomError(`Variable ${node.name} already exists`, node, fullCode);
   if (expression.type != node.varType)
     throwCustomError(
       `${node.name} is of type ${node.varType} not ${expression.type}`,
@@ -939,15 +1016,20 @@ async function runNewExpression(node, env, fullCode, thisEnv = null) {
   }
   const argTypes = argValues.map((v) => v.type);
 
-  const ctor = lookupFunction(classDef, node.className, argTypes, argValues);
+  const constructor = lookupFunction(
+    classDef,
+    node.className,
+    argTypes,
+    argValues,
+  );
 
-  const instanceEnv = makeEnv(classDef);
+  const instanceEnv = makeEnv(env, classDef);
 
-  for (let i = 0; i < ctor.params.length; i++) {
-    instanceEnv.variables[ctor.params[i].name] = argValues[i];
+  for (let i = 0; i < constructor.params.length; i++) {
+    instanceEnv.variables[constructor.params[i].name] = argValues[i];
   }
 
-  for (const stmt of ctor.body) {
+  for (const stmt of constructor.body) {
     const result = await run(stmt, instanceEnv, fullCode, instanceEnv);
     if (result && result.type === "Return") break;
   }
@@ -995,6 +1077,25 @@ async function runForStatement(node, env, fullCode, thisEnv = null) {
 
 async function runFunctionDeclaration(node, env, fullCode) {
   if (!(node.name in env.functions)) env.functions[node.name] = [];
+
+  for (const fn of env.functions[node.name]) {
+    if (fn.params.length != node.params.length) continue;
+    let sameSignature = true;
+    for (let i = 0; i < fn.params.length; i++) {
+      if (fn.params[i].type != node.params[i].type) {
+        sameSignature = false;
+        break;
+      }
+    }
+    if (sameSignature) {
+      throwCustomError(
+        "Function already defined with the same signature",
+        node,
+        fullCode,
+      );
+    }
+  }
+
   env.functions[node.name].push(node);
 }
 
@@ -1046,14 +1147,27 @@ async function runReturnStatement(node, env, fullCode, thisEnv = null) {
 
 async function runClassDeclaration(node, env, fullCode) {
   if (!env.classes) env.classes = {};
+
+  let classExists = true;
+  try {
+    lookupClass(env, node.name, false);
+  } catch (e) {
+    classExists = false;
+  }
+  if (classExists) {
+    throwCustomError(`Class '${node.name}' already exists`, node, fullCode);
+  }
+
   const classEnv = makeEnv(env);
   for (const stmt of node.body) {
     if (stmt.type === "ConstructorDeclaration") {
-      if (!classEnv.functions[stmt.name]) classEnv.functions[stmt.name] = [];
-      classEnv.functions[stmt.name].push(stmt);
+      if (node.name != stmt.name)
+        throwCustomError("Constructor name mismatch", node, fullCode);
+      await runConstructorDeclaration(stmt, classEnv, fullCode);
     } else if (stmt.type === "MethodDeclaration") {
-      if (!classEnv.functions[stmt.name]) classEnv.functions[stmt.name] = [];
-      classEnv.functions[stmt.name].push(stmt);
+      if (node.name == stmt.name)
+        throwCustomError("Method name cannot be same as class", node, fullCode);
+      await runMethodDeclaration(stmt, classEnv, fullCode);
     } else {
       await run(stmt, classEnv, fullCode);
     }
@@ -1063,18 +1177,27 @@ async function runClassDeclaration(node, env, fullCode) {
 }
 
 async function runConstructorDeclaration(node, env, fullCode) {
-  const instanceEnv = makeEnv(env);
+  if (!env.functions[node.name]) env.functions[node.name] = [];
 
-  for (const param of node.params) {
-    instanceEnv.variables[param.name] = { type: param.type, value: null };
+  for (const fn of env.functions[node.name]) {
+    if (fn.params.length != node.params.length) continue;
+    let sameSignature = true;
+    for (let i = 0; i < fn.params.length; i++) {
+      if (fn.params[i].type != node.params[i].type) {
+        sameSignature = false;
+        break;
+      }
+    }
+    if (sameSignature) {
+      throwCustomError(
+        "Constructor already defined with the same signature",
+        node,
+        fullCode,
+      );
+    }
   }
 
-  for (const stmt of node.body) {
-    const result = await run(stmt, instanceEnv, fullCode, instanceEnv);
-    if (result && result.type === "Return") return result.value;
-  }
-
-  return { type: "Instance", value: instanceEnv };
+  env.functions[node.name].push(node);
 }
 
 async function runProgram(node, env, fullCode) {

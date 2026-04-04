@@ -22,7 +22,7 @@ function highlightTokenise(input) {
     { matcher: /^\b(int|float|string|boolean|void)\b/, type: "type-keyword" },
     { matcher: /^\b(if|else|for|while|return)\b/, type: "control-keyword" },
 
-    { matcher: /^\binit\b/, type: "constructor-keyword" },
+    { matcher: /^\b(init|new)\b/, type: "constructor-keyword" },
     { matcher: /^\b(class|struct|enum)\b/, type: "declaration-keyword" },
 
     {
@@ -30,12 +30,11 @@ function highlightTokenise(input) {
       type: "class-declaration",
     },
 
-    {
-      matcher: /^\b(public|private|protected|static|const|final)\b/,
-      type: "modifier-keyword",
-    },
+    // {
+    //   matcher: /^\b(public|private|protected|static|const|final)\b/,
+    //   type: "modifier-keyword",
+    // },
 
-    { matcher: /^\bnew\b/, type: "operator-new" },
     { matcher: /^\bthis\b/, type: "special-keyword" },
 
     { matcher: /^"[^"\r\n]*"/, type: "string-literal" },

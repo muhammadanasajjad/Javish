@@ -46,59 +46,60 @@ async function getCustomInput() {
 }
 
 function throwCustomError(message, node = null, fullCode, displayError = true) {
-  if (displayError) {
-    const container = document.getElementById("output");
+  console.log(node);
+  if (!displayError) throw new Error(message);
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "errorBox";
+  const container = document.getElementById("output");
 
-    const title = document.createElement("div");
-    title.className = "errorTitle";
-    title.textContent = "Error";
+  const wrapper = document.createElement("div");
+  wrapper.className = "errorBox";
 
-    const msg = document.createElement("div");
-    msg.className = "errorMessage";
-    msg.textContent = message;
+  const title = document.createElement("div");
+  title.className = "errorTitle";
+  title.textContent = "Error";
 
-    wrapper.appendChild(title);
-    wrapper.appendChild(msg);
+  const msg = document.createElement("div");
+  msg.className = "errorMessage";
+  msg.textContent = message;
 
-    if (node?.lineNumber && fullCode) {
-      const lines = fullCode.split(/\r?\n/);
-      const lineIndex = node.lineNumber - 1;
-      const lineText = lines[lineIndex] || "";
+  wrapper.appendChild(title);
+  wrapper.appendChild(msg);
 
-      const codeBlock = document.createElement("pre");
-      codeBlock.className = "errorCode";
+  if (node?.lineNumber && fullCode) {
+    const lines = fullCode.split(/\r?\n/);
+    const lineIndex = node.lineNumber - 1;
+    const lineText = lines[lineIndex] || "";
 
-      const lineEl = document.createElement("div");
-      lineEl.textContent = `${node.lineNumber} | ${lineText}`;
+    const codeBlock = document.createElement("pre");
+    codeBlock.className = "errorCode";
 
-      codeBlock.appendChild(lineEl);
+    const lineEl = document.createElement("div");
+    lineEl.textContent = `${node.lineNumber} | ${lineText}`;
 
-      if (node.value) {
-        const col = lineText.indexOf(node.value);
+    codeBlock.appendChild(lineEl);
 
-        if (col !== -1) {
-          const pointer = document.createElement("div");
-          pointer.className = "errorPointer";
+    if (node.value) {
+      const col = lineText.indexOf(node.value);
 
-          const spaces = " ".repeat(String(node.lineNumber).length + 3 + col);
-          pointer.textContent = spaces + "^";
+      if (col !== -1) {
+        const pointer = document.createElement("div");
+        pointer.className = "errorPointer";
 
-          codeBlock.appendChild(pointer);
-        }
+        const spaces = " ".repeat(String(node.lineNumber).length + 3 + col);
+        pointer.textContent = spaces + "^";
+
+        codeBlock.appendChild(pointer);
       }
-
-      wrapper.appendChild(codeBlock);
     }
 
-    container.appendChild(wrapper);
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: "smooth",
-    });
+    wrapper.appendChild(codeBlock);
   }
+
+  container.appendChild(wrapper);
+  container.scrollTo({
+    top: container.scrollHeight,
+    behavior: "smooth",
+  });
 
   throw new Error(message);
 }
