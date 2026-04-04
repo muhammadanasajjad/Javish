@@ -17,7 +17,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_tree,arrow_back_ios,article,close,code"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_tree,arrow_back_ios,article,close,code,fullscreen,fullscreen_exit"
     />
   </head>
   <body>
@@ -34,19 +34,33 @@
           <h1>Javish Interpreter</h1>
         </div>
         <button id="toggle-docs" class="toggle-docs">
-          <span class="material-symbols-outlined"> article </span>
+          <span class="material-symbols-outlined">article</span>
         </button>
       </div>
-      <h2 class="non-docs">Tokens</h2>
-      <div id="tokens" class="panel non-docs"></div>
-      <h2 class="non-docs">Parsed Tree (AST)</h2>
-      <div id="ast" class="panel non-docs"></div>
+      <div class="tokens panel non-docs">
+        <h2 class="non-docs">Tokens</h2>
+        <div id="tokens">
+          <button class="fullscreen-btn">
+            <span class="material-symbols-outlined">fullscreen</span>
+          </button>
+        </div>
+      </div>
+      <div class="ast panel non-docs">
+        <h2 class="non-docs">Parsed Tree (AST)</h2>
+        <button class="fullscreen-btn">
+          <span class="material-symbols-outlined">fullscreen</span>
+        </button>
+        <div id="ast"></div>
+      </div>
       <div id="docs" class="panel docs">
         <div id="docs-content" class="markdown"></div>
       </div>
     </div>
     <div id="divider"></div>
     <div class="main">
+      <button class="fullscreen-btn">
+        <span class="material-symbols-outlined">fullscreen</span>
+      </button>
       <div class="editorWrapper">
         <div class="lineNumbers" id="lineNumbers"></div>
         <pre id="highlighted"></pre>

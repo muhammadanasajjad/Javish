@@ -95,13 +95,16 @@ pre {
   background: #24283b;
 }
 
-.sidebar > h2 {
-  padding-left: 20px;
+.panel > h2 {
+  margin-left: 10px;
   margin-bottom: 10px;
+  margin-top: 18px;
   color: #c0caf5;
 }
 
 .panel {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   overflow: auto;
   padding: 10px;
@@ -112,6 +115,10 @@ pre {
 
 .panel.docs {
   padding: 0px;
+}
+
+#ast {
+  height: 100%;
 }
 
 .tv-wrap {
@@ -308,6 +315,7 @@ pre {
 }
 
 .controls {
+  background-color: #24283b;
   padding: 10px;
   border-top: 1px solid #292e42;
   display: flex;
@@ -461,7 +469,7 @@ button:hover {
   flex-direction: column;
   right: -350px;
   height: 100%;
-  z-index: 4;
+  z-index: 10000000000000;
   display: flex;
   flex-wrap: nowrap;
   overflow: auto;
@@ -588,17 +596,18 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: #3b4261;
   border: none;
   color: #a9b1d6;
   cursor: pointer;
-  padding: 7px;
+  /* padding: 7px; */
+  font-size: 15px;
   border-radius: 5000px;
 }
 
 .title-card button:hover {
-  background: #3b4261;
-  color: #c0caf5;
+  background: #a9b1d6;
+  color: #3b4261;
 }
 
 .docs {
@@ -745,4 +754,68 @@ html::-webkit-scrollbar-thumb {
 
 html::-webkit-scrollbar-thumb:hover {
   background: #565f89;
+}
+
+.fullscreen-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 10;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+}
+
+.fullscreen-btn span {
+  font-size: 20px;
+}
+
+#tokens {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0px;
+}
+
+.tokens {
+  padding-bottom: 0px;
+}
+
+.tokens .fullscreen-btn {
+  display: flex;
+  position: sticky;
+  align-self: flex-end;
+  margin-top: 10px;
+  right: 0px;
+}
+
+.fullscreen-btn.above-all {
+  z-index: 1000000;
+}
+
+.fullscreen {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999;
+  background-color: #1f2335 !important;
+}
+
+.ast.fullscreen .fullscreen-btn {
+  right: 30px;
+  bottom: 20px;
+}
+
+.tokens.fullscreen .fullscreen-btn {
+  position: fixed;
+  right: 10px;
+}
+
+.ast.fullscreen .main,
+.ast,
+.tokens {
+  position: relative;
 }

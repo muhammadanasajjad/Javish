@@ -114,11 +114,31 @@ function updateSidebar() {
     const renderedTokens = highlightTokenise(code);
 
     const tvWrap = document.getElementById("tokens");
-    tvWrap.innerHTML = `<div class="tv-wrap">
+    tvWrap.innerHTML = `
+    <div class="tv-wrap">
       <div class="tv-controls" id="tv-controls"></div>
       <div class="tv-legend" id="tv-legend"></div>
       <div class="tv-lines" id="tv-lines"></div>
-    </div>`;
+    </div>
+    <button class="fullscreen-btn"><span class="material-symbols-outlined">fullscreen</span></button>`;
+
+    const fullScreenBtns = document.getElementsByClassName("fullscreen-btn");
+    for (let i = 0; i < 3; i++) {
+      const btn = fullScreenBtns[i];
+      btn.onclick = (e) => {
+        const panel = e.target.closest(".panel, .main");
+
+        console.log(panel);
+
+        if (!panel) return;
+
+        btn.classList.toggle("aboveAll");
+        panel.classList.toggle("fullscreen");
+        btn.innerHTML = panel.classList.contains("fullscreen")
+          ? '<span class="material-symbols-outlined">fullscreen_exit</span>'
+          : '<span class="material-symbols-outlined">fullscreen</span>';
+      };
+    }
 
     const fallback = { bg: "#2a2a2a", border: "#555", text: "#888" };
 
@@ -270,11 +290,32 @@ function runCode() {
     const renderedTokens = highlightTokenise(code);
 
     const tvWrap = document.getElementById("tokens");
-    tvWrap.innerHTML = `<div class="tv-wrap">
+    tvWrap.innerHTML = `
+    <div class="tv-wrap">
       <div class="tv-controls" id="tv-controls"></div>
       <div class="tv-legend" id="tv-legend"></div>
       <div class="tv-lines" id="tv-lines"></div>
-    </div>`;
+    </div>
+    
+    <button class="fullscreen-btn"><span class="material-symbols-outlined">fullscreen</span></button>`;
+
+    const fullScreenBtns = document.getElementsByClassName("fullscreen-btn");
+    for (let i = 0; i < 3; i++) {
+      const btn = fullScreenBtns[i];
+      btn.onclick = (e) => {
+        const panel = e.target.closest(".panel, .main");
+
+        console.log(panel);
+
+        if (!panel) return;
+
+        btn.classList.toggle("aboveAll");
+        panel.classList.toggle("fullscreen");
+        btn.innerHTML = panel.classList.contains("fullscreen")
+          ? '<span class="material-symbols-outlined">fullscreen_exit</span>'
+          : '<span class="material-symbols-outlined">fullscreen</span>';
+      };
+    }
 
     const fallback = { bg: "#2a2a2a", border: "#555", text: "#888" };
 
@@ -435,7 +476,10 @@ function astToVisNodesEdges(
 
   nodes.push({
     id,
-    label: node.type == "BinaryExpr" ? "BinaryOperator" : node.type + (extraLabel ? ` \n${extraLabel}` : ""),
+    label:
+      node.type == "BinaryExpr"
+        ? "BinaryOperator"
+        : node.type + (extraLabel ? ` \n${extraLabel}` : ""),
     level: depth,
     color: {
       background: style.bg,
@@ -747,3 +791,21 @@ fetch("DOCS.md")
   .then((md) => {
     document.getElementById("docs-content").innerHTML = marked.parse(md);
   });
+
+const fullScreenBtns = document.getElementsByClassName("fullscreen-btn");
+for (let i = 0; i < 3; i++) {
+  const btn = fullScreenBtns[i];
+  btn.onclick = (e) => {
+    const panel = e.target.closest(".panel, .main");
+
+    console.log(panel);
+
+    if (!panel) return;
+
+    btn.classList.toggle("aboveAll");
+    panel.classList.toggle("fullscreen");
+    btn.innerHTML = panel.classList.contains("fullscreen")
+      ? '<span class="material-symbols-outlined">fullscreen_exit</span>'
+      : '<span class="material-symbols-outlined">fullscreen</span>';
+  };
+}
