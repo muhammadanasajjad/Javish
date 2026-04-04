@@ -41,15 +41,15 @@ Comments:
 Declare variables with a type and name:
 
 ```javish
-int age = 20;
-string name = "Anas";
+int age = 100;
+string name = "Person";
 boolean isActive = true;
 ```
 
 Variables can be reassigned:
 
 ```javish
-age = 25;
+age = 101;
 ```
 
 ## Operators
