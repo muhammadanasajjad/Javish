@@ -97,9 +97,9 @@ editor.addEventListener("keydown", (e) => {
     const end = editor.selectionEnd;
 
     editor.value =
-      editor.value.substring(0, start) + "    " + editor.value.substring(end);
+      editor.value.substring(0, start) + "  " + editor.value.substring(end);
 
-    editor.selectionStart = editor.selectionEnd = start + 4;
+    editor.selectionStart = editor.selectionEnd = start + 2;
 
     updateLineNumbers();
     updateHighlight();
@@ -187,6 +187,7 @@ editor.addEventListener("input", () => {
   updateHighlight();
 });
 editor.addEventListener("scroll", () => {
+  highlighted.style.height = editor.clientHeight + "px";
   highlighted.scrollTop = editor.scrollTop;
   highlighted.scrollLeft = editor.scrollLeft;
   lineNumbers.scrollTop = editor.scrollTop;
@@ -401,6 +402,7 @@ function astToVisNodesEdges(
     ConstructorDeclaration: "constructor-keyword",
     ObjectDeclaration: "declaration-keyword",
     MemberAssignment: "assignment",
+    MemberExpression: "variable-identifier",
     FunctionCall: "function-call",
     MethodCall: "function-call",
     ConstructorCall: "constructor-keyword",
@@ -424,7 +426,7 @@ function astToVisNodesEdges(
   const style = palette[nodeColorMap[node.type] || "unknown"];
   let extraLabel = node.name ?? node.value ?? node.operator ?? "";
 
-  if (node.type === "MemberAssignment") {
+  if (node.type === "MemberAssignment" || node.type === "MemberExpression") {
     extraLabel = node.object + "." + node.property;
   }
   if (node.type === "IndexAssignment") {
@@ -433,7 +435,7 @@ function astToVisNodesEdges(
 
   nodes.push({
     id,
-    label: node.type + (extraLabel ? ` (${extraLabel})` : ""),
+    label: node.type == "BinaryExpr" ? "BinaryOperator" : node.type + (extraLabel ? ` \n${extraLabel}` : ""),
     level: depth,
     color: {
       background: style.bg,
@@ -458,13 +460,13 @@ function astToVisNodesEdges(
     return;
   }
 
-  if (node.body)
-    node.body.forEach((c) =>
+  if (node.params)
+    node.params.forEach((c) =>
       astToVisNodesEdges(c, id, nodes, edges, depth + 1),
     );
 
-  if (node.params)
-    node.params.forEach((c) =>
+  if (node.body)
+    node.body.forEach((c) =>
       astToVisNodesEdges(c, id, nodes, edges, depth + 1),
     );
 

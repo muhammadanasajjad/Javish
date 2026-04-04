@@ -111,32 +111,41 @@ if (isPrime) {
 }`,
 
   `// Caesar-like encryption
-string msg = input("Enter message: ");
+string encrypt(string message, int shift) {
+  string result = "";
+  int i = 0;
+  
+  while (i < message.length) {
+    int code = ord(message[i]);
+    code = (code + shift) % 256;
+    result += chr(code);
+    i += 1;
+  }
+  
+  return result;
+}
+
+string decrypt(string encrypted, int shift) {
+  string result = "";
+  int i = 0;
+  
+  while (i < encrypted.length) {
+    int code = ord(encrypted[i]);
+    code = (code - shift + 256) % 256;
+    result += chr(code);
+    i += 1;
+  }
+  
+  return result;
+}
+
+string message = input("Enter message: ");
 int shift = int(input("Enter shift: "));
 
-string result = "";
-int i = 0;
+string encrypted = encrypt(message, shift);
+print("Encrypted: " + encrypted);
 
-while (i < msg.length) {
-  int code = ord(msg[i]);
-  code = (code + shift) % 256;
-  result = result + chr(code);
-  i = i + 1;
-}
-
-print("Encrypted: " + result);
-
-// decrypt
-string decrypted = "";
-i = 0;
-
-while (i < result.length) {
-  int code = ord(result[i]);
-  code = (code - shift + 256) % 256;
-  decrypted = decrypted + chr(code);
-  i = i + 1;
-}
-
+string decrypted = decrypt(encrypted, shift);
 print("Decrypted: " + decrypted);`,
 
   `// Find max in array
@@ -318,6 +327,7 @@ const presetDetails = [
       },
       { name: "ord/chr", bg: "#23263a", border: "#7dcfff", text: "#7dcfff" },
       { name: "while loop", bg: "#2a1a3a", border: "#bb9af7", text: "#bb9af7" },
+      { name: "functions", bg: "#23263a", border: "#7dcfff", text: "#7dcfff" }
     ],
   },
   {

@@ -466,6 +466,7 @@ button:hover {
   flex-wrap: nowrap;
   overflow: auto;
   padding: 10px;
+  padding-top: 0px;
   transition: all 0.3s ease;
 }
 
@@ -538,11 +539,15 @@ button:hover {
 }
 
 .preset-header {
+  position: sticky;
+  top: 0;
+  padding-top: 10px;
   display: flex;
   padding-left: 15px;
   padding-right: 15px;
   justify-content: space-between;
   align-items: center;
+  background-color: inherit;
 }
 
 #preset-close:hover {
