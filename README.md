@@ -13,7 +13,7 @@ Javish is a **custom interpreted programming language** based off of the Java sy
 - **Operators:**
   - Arithmetic: `+`, `-`, `*`, `/`, `%`
   - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
-  - Logical: `&&`, `||`, `!`
+  - Logical: `&&`, `||`
   - Special: `new`, `this`
 - **Comments:**
   - Line comments: `//`

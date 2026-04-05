@@ -56,7 +56,7 @@ age = 101;
 
 - Arithmetic: `+`, `-`, `*`, `/`, `%`
 - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
-- Logical: `&&`, `||`, `!`
+- Logical: `&&`, `||`
 
 ## Control Flow
 
