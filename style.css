@@ -117,6 +117,10 @@ pre {
   padding: 0px;
 }
 
+.panel.ast {
+  overflow: hidden;
+}
+
 #ast {
   height: 100%;
 }
@@ -512,11 +516,15 @@ button:hover {
 }
 
 #preset-open span {
-  width: 0.5rem;
+  width: 1rem;
 }
 
 #preset-open {
   position: absolute;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   top: 50px;
   right: 0;
   z-index: 3;

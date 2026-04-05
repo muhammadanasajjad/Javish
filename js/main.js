@@ -444,8 +444,8 @@ function astToVisNodesEdges(
     ObjectDeclaration: "declaration-keyword",
     MemberAssignment: "assignment",
     MemberExpression: "variable-identifier",
-    FunctionCall: "function-call",
-    MethodCall: "function-call",
+    FunctionCall: "function-declaration",
+    MethodCall: "function-declaration",
     ConstructorCall: "constructor-keyword",
     Declaration: "declaration-keyword",
     Assignment: "assignment",
@@ -471,6 +471,9 @@ function astToVisNodesEdges(
     extraLabel = node.object + "." + node.property;
   }
   if (node.type === "IndexAssignment") {
+    extraLabel = "";
+  }
+  if (node.type === "ReturnStatement") {
     extraLabel = "";
   }
 

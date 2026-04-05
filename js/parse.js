@@ -38,34 +38,6 @@ function parse(tokens, fullCode, displayErrors = true) {
     return tokens[pos++];
   }
 
-  function isArrayType(startPos) {
-    let i = startPos;
-    const tok = tokens[i];
-    if (!tok) return false;
-    const isBase =
-      typeKeywords.includes(tok.value) || identifierRegex.test(tok.value);
-    if (!isBase) return false;
-    i++;
-    if (!tokens[i] || tokens[i].value !== "[") return false;
-    while (tokens[i] && tokens[i].value === "[") {
-      if (!tokens[i + 1] || tokens[i + 1].value !== "]") return false;
-      i += 2;
-    }
-    return i > startPos + 1;
-  }
-
-  function parseArrayType() {
-    const { value: baseTypeName, lineNumber } = consume();
-    const baseName = typeNameMap[baseTypeName] ?? baseTypeName;
-    let dims = 0;
-    while (peek() && peek().value === "[" && peek(1) && peek(1).value === "]") {
-      consume("[");
-      consume("]");
-      dims++;
-    }
-    return { baseName, dims, lineNumber };
-  }
-
   function parseCallArgs() {
     consume("(");
     const params = [];
@@ -1007,10 +979,15 @@ function parse(tokens, fullCode, displayErrors = true) {
     } else if (token === "init") {
       stmt = parseConstructorDeclaration();
     } else if (token === "return") {
-      consume("return");
-      const value = prattParseExpression();
-      consume(";");
-      stmt = { type: "ReturnStatement", value, lineNumber: value.lineNumber };
+      const { lineNumber } = consume("return");
+      if (peek().value === ";") {
+        consume(";");
+        stmt = { type: "ReturnStatement", value: null, lineNumber };
+      } else {
+        const value = prattParseExpression();
+        consume(";");
+        stmt = { type: "ReturnStatement", value, lineNumber: value.lineNumber };
+      }
     } else if (controlFlowStatements.includes(token)) {
       stmt = parseControlFlowStatements();
     } else if (
