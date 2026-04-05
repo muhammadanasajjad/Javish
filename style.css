@@ -827,3 +827,9 @@ html::-webkit-scrollbar-thumb:hover {
 .tokens {
   position: relative;
 }
+
+@media (max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+}
