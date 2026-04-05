@@ -828,8 +828,29 @@ html::-webkit-scrollbar-thumb:hover {
   position: relative;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
   .sidebar {
     display: none;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  #divider {
+    display: none;
+  }
+
+  .main {
+    width: 100%;
+  }
+
+  .editor-wrapper {
+    padding-right: 30px;
   }
 }
